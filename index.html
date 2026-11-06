@@ -220,7 +220,48 @@
   <!-- Bottom Floating Action Buttons -->
   <div class="fab-group">
     <button class="fab-catat" onclick="openTxModal('expense')">+ Catat</button>
-    <button class="fab-plus" onclick="openTxModal('expense')">+</button>
+    <button class="fab-plus" onclick="openActionMenu()">+</button>
+  </div>
+
+  <!-- Popup Pilihan Aksi Tambah -->
+  <div class="modal-overlay" id="actionMenuModal" onclick="closeModalOnOut(event, 'actionMenuModal')">
+    <div class="modal-sheet" style="padding-bottom: 24px;">
+      <div class="sheet-head">
+        <h3 style="font-size: 1rem; font-weight: 700;">Mau Catat Apa?</h3>
+        <button class="icon-btn" onclick="closeModal('actionMenuModal')">✕</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('income');">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#ecfdf5; color:var(--income-green);">📥</div>
+            <div class="acc-info">
+              <h4>Pemasukan</h4>
+              <p>Tambah uang masuk ke rekening atau cash</p>
+            </div>
+          </div>
+        </button>
+
+        <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('expense');">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#fff1f2; color:var(--expense-red);">📤</div>
+            <div class="acc-info">
+              <h4>Pengeluaran</h4>
+              <p>Catat belanja, makan, atau operasional</p>
+            </div>
+          </div>
+        </button>
+
+        <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('transfer');">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#eff6ff; color:var(--primary-blue);">🔁</div>
+            <div class="acc-info">
+              <h4>Pindah Saldo (Transfer)</h4>
+              <p>Kirim saldo antar rekening atau tarik tunai ke cash</p>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Navigation -->
@@ -339,6 +380,10 @@
     function formatRupiah(num) {
       return "Rp" + Number(num).toLocaleString("id-ID");
     }
+
+    function openActionMenu() {
+  document.getElementById('actionMenuModal').classList.add('open');
+}
 
     function saveState() {
       localStorage.setItem('meld_accounts', JSON.stringify(accounts));
@@ -487,64 +532,87 @@
       });
     }
 
-    function saveTransaction() {
-      const amt = parseFloat(document.getElementById('txAmount').value);
-      const desc = document.getElementById('txDesc').value.trim() || 'Transaksi';
-      const cat = document.getElementById('txCategory').value;
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+   function saveTransaction() {
+  const amtInput = document.getElementById('txAmount').value;
+  const amt = parseFloat(amtInput);
+  const desc = document.getElementById('txDesc').value.trim() || 'Transaksi';
+  const cat = document.getElementById('txCategory').value;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
 
-      if (!amt || amt <= 0) return alert('Masukkan nominal valid!');
+  if (isNaN(amt) || amt <= 0) {
+    return alert('Masukkan nominal valid lebih dari 0!');
+  }
 
-      if (currentTxType === 'transfer') {
-        const fromId = document.getElementById('tfSource').value;
-        const toId = document.getElementById('tfTarget').value;
-        if (fromId === toId) return alert('Aset sumber dan tujuan tidak boleh sama!');
+  if (currentTxType === 'transfer') {
+    const fromId = document.getElementById('tfSource').value;
+    const toId = document.getElementById('tfTarget').value;
 
-        let fromAcc = accounts.find(a => a.id === fromId);
-        let toAcc = accounts.find(a => a.id === toId);
-
-        if (fromAcc.balance < amt) return alert('Saldo aset sumber tidak cukup!');
-        fromAcc.balance -= amt;
-        toAcc.balance += amt;
-
-        transactions.unshift({
-          id: Date.now(),
-          desc: desc,
-          amount: amt,
-          type: 'transfer',
-          category: 'Pindah Saldo',
-          accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
-          date: dateStr
-        });
-      } else {
-        const targetId = document.getElementById('txAsset').value;
-        let targetAcc = accounts.find(a => a.id === targetId);
-
-        if (currentTxType === 'expense') {
-          if (targetAcc.balance < amt) return alert('Saldo aset tidak mencukupi!');
-          targetAcc.balance -= amt;
-        } else {
-          targetAcc.balance += amt;
-        }
-
-        transactions.unshift({
-          id: Date.now(),
-          desc: desc,
-          amount: amt,
-          type: currentTxType,
-          category: cat,
-          accountName: targetAcc.name,
-          date: dateStr
-        });
-      }
-
-      // Reset & Save
-      document.getElementById('txAmount').value = '';
-      document.getElementById('txDesc').value = '';
-      closeModal('txModal');
-      saveState();
+    if (fromId === toId) {
+      return alert('Aset sumber dan tujuan tidak boleh sama!');
     }
+
+    let fromAcc = accounts.find(a => a.id === fromId);
+    let toAcc = accounts.find(a => a.id === toId);
+
+    if (parseFloat(fromAcc.balance) < amt) {
+      return alert('Saldo di akun ' + fromAcc.name + ' tidak cukup! Sisa saldo: ' + formatRupiah(fromAcc.balance));
+    }
+
+    // Pastikan operasi matematika murni (angka dikurangi angka)
+    fromAcc.balance = parseFloat(fromAcc.balance) - amt;
+    toAcc.balance = parseFloat(toAcc.balance) + amt;
+
+    transactions.unshift({
+      id: Date.now(),
+      desc: desc,
+      amount: amt,
+      type: 'transfer',
+      category: 'Pindah Saldo',
+      accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
+      date: dateStr
+    });
+
+  } else {
+    const targetId = document.getElementById('txAsset').value;
+    let targetAcc = accounts.find(a => a.id === targetId);
+
+    if (!targetAcc) {
+      return alert('Pilih dompet/rekening tujuan terlebih dahulu!');
+    }
+
+    if (currentTxType === 'expense') {
+      if (parseFloat(targetAcc.balance) < amt) {
+        return alert('Saldo di ' + targetAcc.name + ' tidak cukup! Sisa: ' + formatRupiah(targetAcc.balance));
+      }
+      // PENGURANGAN SALDO OTOMATIS
+      targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+    } else if (currentTxType === 'income') {
+      // PENAMBAHAN SALDO OTOMATIS
+      targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+    }
+
+    transactions.unshift({
+      id: Date.now(),
+      desc: desc,
+      amount: amt,
+      type: currentTxType,
+      category: cat,
+      accountName: targetAcc.name,
+      date: dateStr
+    });
+  }
+
+  // Bersihkan form
+  document.getElementById('txAmount').value = '';
+  document.getElementById('txDesc').value = '';
+  
+  // Tutup popup modal
+  closeModal('txModal');
+  
+  // SIMPAN PERUBAHAN KE LOCALSTORAGE & RENDER ULANG TAMPILAN
+  saveState();
+}
 
     /* Modal Tambah Akun */
     function openNewAccountModal() {

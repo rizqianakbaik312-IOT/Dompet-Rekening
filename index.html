@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Meld App Clone</title>
+  <title>Smart Dompet & Ops Tracker</title>
   <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -21,7 +21,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 95px; }
 
     /* Top Bar */
     .top-navbar {
@@ -30,7 +30,7 @@
     }
     .nav-left { display: flex; align-items: center; gap: 14px; }
     .icon-btn { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #334155; }
-    .profile-pill { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .profile-pill { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
 
     /* Sidebar Drawer */
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
@@ -47,26 +47,32 @@
     /* Main Container */
     .view-content { max-width: 480px; margin: auto; padding: 16px; }
 
-    /* Views */
+    /* Tab Views */
     .tab-view { display: none; }
     .tab-view.active { display: block; }
 
-    /* Beranda (Net Worth) */
+    /* Beranda Cards */
     .net-worth-box {
       background: var(--card-dark); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 18px;
       box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
     }
     .net-title { font-size: 0.75rem; letter-spacing: 1px; color: #94a3b8; font-weight: 600; }
-    .net-val { font-size: 1.8rem; font-weight: 700; margin: 8px 0 18px 0; }
+    .net-val { font-size: 1.8rem; font-weight: 700; margin: 8px 0 16px 0; }
     .inc-exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #334155; padding-top: 14px; }
     .inc-exp-item span { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 2px; }
     .inc-exp-item strong { font-size: 0.95rem; }
 
-    /* Profil Keuangan (Assets: Bank & Cash) */
+    /* Utang Piutang Summary Cards */
+    .debt-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .debt-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; }
+    .debt-card-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    .debt-card-val { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
+
+    /* Section Headers */
     .asset-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .btn-blue { background: var(--primary-blue); color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
-    
     .asset-section-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin: 18px 0 8px 0; text-transform: uppercase; }
+    
     .account-card {
       background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
       display: flex; align-items: center; justify-content: space-between;
@@ -77,7 +83,12 @@
     .acc-info p { font-size: 0.75rem; color: var(--text-muted); }
     .acc-bal { font-size: 0.95rem; font-weight: 700; }
 
-    /* Riwayat Transaksi List */
+    /* Mutasi M-Banking Style */
+    .date-group { margin-bottom: 20px; }
+    .date-header {
+      display: flex; justify-content: space-between; align-items: center; padding: 6px 0;
+      border-bottom: 2px solid #cbd5e1; margin-bottom: 8px; font-size: 0.8rem; font-weight: 700; color: #475569;
+    }
     .tx-item {
       background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
       display: flex; justify-content: space-between; align-items: center;
@@ -85,16 +96,29 @@
     .tx-left { display: flex; align-items: center; gap: 12px; }
     .tx-icon { width: 36px; height: 36px; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
     .tx-title { font-size: 0.85rem; font-weight: 600; }
-    .tx-sub { font-size: 0.7rem; color: var(--text-muted); }
+    .tx-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .tx-amount { font-size: 0.9rem; font-weight: 700; text-align: right; }
     .tx-inc { color: var(--income-green); }
     .tx-exp { color: var(--expense-red); }
     .tx-tf { color: var(--primary-blue); }
 
-    /* Bottom Floating Action Buttons */
-    .fab-group { position: fixed; bottom: 80px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 30; }
+    /* Debt/Credit Cards */
+    .debt-item-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+    }
+    .debt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .debt-person { font-size: 0.95rem; font-weight: 700; }
+    .debt-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 8px; }
+    .badge-unpaid { background: #fee2e2; color: #b91c1c; }
+    .badge-paid { background: #dcfce7; color: #15803d; }
+    .debt-action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+    .btn-settle { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+    .btn-settle:active { background: #e2e8f0; }
+
+    /* Bottom Floating Buttons */
+    .fab-group { position: fixed; bottom: 78px; right: 18px; display: flex; align-items: center; gap: 10px; z-index: 30; }
     .fab-catat {
-      background: var(--primary-blue); color: #fff; border: none; border-radius: 24px; padding: 12px 20px;
+      background: var(--primary-blue); color: #fff; border: none; border-radius: 24px; padding: 12px 18px;
       font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);
     }
     .fab-plus {
@@ -103,7 +127,7 @@
       box-shadow: 0 6px 16px rgba(245,158,11,0.4);
     }
 
-    /* Bottom Navigation Bar */
+    /* Bottom Nav Bar */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border);
       height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 40;
@@ -121,18 +145,18 @@
     }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .type-switcher { display: flex; gap: 8px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-    .type-btn { flex: 1; border: none; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; background: transparent; color: #64748b; }
+    .type-switcher { display: flex; gap: 6px; margin-bottom: 14px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+    .type-btn { flex: 1; border: none; padding: 8px 4px; border-radius: 8px; font-weight: 600; font-size: 0.75rem; cursor: pointer; background: transparent; color: #64748b; }
     .type-btn.active { background: #fff; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
     .form-group input, .form-group select {
-      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff;
+      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; background: #fff;
     }
     .btn-submit-action {
       width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary-blue); color: #fff;
-      font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 10px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px;
     }
   </style>
 </head>
@@ -158,7 +182,8 @@
       </div>
     </div>
     <div class="side-menu-item active" onclick="switchTab('beranda'); toggleSidebar();">🏠 Beranda</div>
-    <div class="side-menu-item" onclick="switchTab('transaksi'); toggleSidebar();">📑 Riwayat Transaksi</div>
+    <div class="side-menu-item" onclick="switchTab('transaksi'); toggleSidebar();">📑 Riwayat & Mutasi</div>
+    <div class="side-menu-item" onclick="switchTab('utangpiutang'); toggleSidebar();">🤝 Utang & Piutang</div>
     <div class="side-menu-item" onclick="switchTab('profil'); toggleSidebar();">💳 Profil (Rekening & Cash)</div>
     <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
       <div class="side-menu-item" onclick="exportBackup()">💾 Backup Data (JSON)</div>
@@ -185,20 +210,49 @@
         </div>
       </div>
 
-      <h3 style="font-size:0.95rem; margin-bottom:12px;">Transaksi Terakhir</h3>
+      <!-- Quick Debt Summary -->
+      <div class="debt-summary-grid">
+        <div class="debt-card" onclick="switchTab('utangpiutang')">
+          <div class="debt-card-title">Piutang (Orang Utang ke Kita)</div>
+          <div class="debt-card-val" style="color:var(--income-green)" id="totalPiutangHome">Rp 0</div>
+        </div>
+        <div class="debt-card" onclick="switchTab('utangpiutang')">
+          <div class="debt-card-title">Utang (Kita Minjam)</div>
+          <div class="debt-card-val" style="color:var(--expense-red)" id="totalUtangHome">Rp 0</div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.95rem; margin-bottom:12px;">Transaksi Terkini</h3>
       <div id="homeRecentTx"></div>
     </div>
 
-    <!-- 2. TAB TRANSAKSI -->
+    <!-- 2. TAB TRANSAKSI (MUTASI ALA M-BANKING) -->
     <div class="tab-view" id="view-transaksi">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
-        <h2 style="font-size: 1.1rem; font-weight: 700;">Semua Transaksi</h2>
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Mutasi Rekening</h2>
         <span style="font-size:0.75rem; color:var(--text-muted);" id="txCountBadge">0 Transaksi</span>
       </div>
-      <div id="allTxFeed"></div>
+      <div id="mBankingTxFeed"></div>
     </div>
 
-    <!-- 3. TAB PROFIL (REKENING & CASH) -->
+    <!-- 3. TAB UTANG & PIUTANG -->
+    <div class="tab-view" id="view-utangpiutang">
+      <div class="asset-header-bar">
+        <div>
+          <h2 style="font-size:1.1rem; font-weight:700;">Buku Utang Piutang</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted);">Pantau pinjaman & pengembalian</p>
+        </div>
+        <button class="btn-blue" onclick="openNewDebtModal()">+ Tambah Catatan</button>
+      </div>
+
+      <div class="asset-section-title">Piutang Aktif (Uang di Orang Lain)</div>
+      <div id="piutangList"></div>
+
+      <div class="asset-section-title" style="margin-top:20px;">Utang Aktif (Kewajiban Bayar)</div>
+      <div id="utangList"></div>
+    </div>
+
+    <!-- 4. TAB PROFIL (REKENING & CASH) -->
     <div class="tab-view" id="view-profil">
       <div class="asset-header-bar">
         <div>
@@ -223,40 +277,47 @@
     <button class="fab-plus" onclick="openActionMenu()">+</button>
   </div>
 
-  <!-- Popup Pilihan Aksi Tambah -->
+  <!-- Hub Action Menu (+) -->
   <div class="modal-overlay" id="actionMenuModal" onclick="closeModalOnOut(event, 'actionMenuModal')">
     <div class="modal-sheet" style="padding-bottom: 24px;">
       <div class="sheet-head">
-        <h3 style="font-size: 1rem; font-weight: 700;">Mau Catat Apa?</h3>
+        <h3 style="font-size: 1rem; font-weight: 700;">Aksi Cepat</h3>
         <button class="icon-btn" onclick="closeModal('actionMenuModal')">✕</button>
       </div>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('income');">
           <div class="acc-left">
             <div class="acc-icon" style="background:#ecfdf5; color:var(--income-green);">📥</div>
             <div class="acc-info">
               <h4>Pemasukan</h4>
-              <p>Tambah uang masuk ke rekening atau cash</p>
+              <p>Tambah uang masuk ke rekening/cash</p>
             </div>
           </div>
         </button>
-
         <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('expense');">
           <div class="acc-left">
             <div class="acc-icon" style="background:#fff1f2; color:var(--expense-red);">📤</div>
             <div class="acc-info">
               <h4>Pengeluaran</h4>
-              <p>Catat belanja, makan, atau operasional</p>
+              <p>Catat pengeluaran belanja/ops</p>
             </div>
           </div>
         </button>
-
         <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openTxModal('transfer');">
           <div class="acc-left">
             <div class="acc-icon" style="background:#eff6ff; color:var(--primary-blue);">🔁</div>
             <div class="acc-info">
               <h4>Pindah Saldo (Transfer)</h4>
-              <p>Kirim saldo antar rekening atau tarik tunai ke cash</p>
+              <p>Tarik tunai atau transfer antar rekening</p>
+            </div>
+          </div>
+        </button>
+        <button class="account-card" style="width: 100%; border: none; cursor: pointer; text-align: left;" onclick="closeModal('actionMenuModal'); openNewDebtModal();">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#fef3c7; color:var(--primary-yellow);">🤝</div>
+            <div class="acc-info">
+              <h4>Catat Utang / Piutang</h4>
+              <p>Pinjam uang atau pinjamkan ke orang lain</p>
             </div>
           </div>
         </button>
@@ -272,7 +333,11 @@
     </button>
     <button class="nav-tab" id="tabBtn-transaksi" onclick="switchTab('transaksi')">
       <i>📑</i>
-      <span>Transaksi</span>
+      <span>Mutasi</span>
+    </button>
+    <button class="nav-tab" id="tabBtn-utangpiutang" onclick="switchTab('utangpiutang')">
+      <i>🤝</i>
+      <span>Utang</span>
     </button>
     <button class="nav-tab" id="tabBtn-profil" onclick="switchTab('profil')">
       <i>👤</i>
@@ -280,7 +345,7 @@
     </button>
   </div>
 
-  <!-- Modal Tambah Transaksi (Add Transaction) -->
+  <!-- Modal Tambah Transaksi -->
   <div class="modal-overlay" id="txModal" onclick="closeModalOnOut(event, 'txModal')">
     <div class="modal-sheet">
       <div class="sheet-head">
@@ -295,34 +360,37 @@
       </div>
 
       <div class="form-group">
-        <label>Nominal (Rp)</label>
-        <input type="number" id="txAmount" placeholder="0">
+        <label>Tanggal Transaksi</label>
+        <input type="date" id="txDate">
       </div>
 
       <div class="form-group">
-        <label>Nama / Catatan</label>
+        <label>Nominal (Rp)</label>
+        <input type="text" id="txAmount" placeholder="0" inputmode="numeric" oninput="formatRupiahInput(this)">
+      </div>
+
+      <div class="form-group">
+        <label>Nama / Keterangan</label>
         <input type="text" id="txDesc" placeholder="Misal: Beli makan siang / bensin ops">
       </div>
 
       <div class="form-group" id="categoryGroup">
         <label>Kategori</label>
         <select id="txCategory">
-          <option value="Makan & Minum">Makan & Minum</option>
           <option value="Operasional Lapangan">Operasional Lapangan</option>
-          <option value="Transportasi">Transportasi</option>
-          <option value="Komponen & Belanja">Komponen & Belanja</option>
-          <option value="Gaji & Rembes">Gaji & Rembes</option>
+          <option value="Makan & Minum">Makan & Minum</option>
+          <option value="Transport & Bensin">Transport & Bensin</option>
+          <option value="Alat & Komponen">Alat & Komponen</option>
+          <option value="Gaji / Fee Proyek">Gaji / Fee Proyek</option>
           <option value="Lainnya">Lainnya</option>
         </select>
       </div>
 
-      <!-- Pilihan Aset untuk Income/Expense -->
       <div class="form-group" id="singleAccountGroup">
-        <label id="assetLabel">Keluarkan Dari Aset</label>
+        <label id="assetLabel">Keluarkan Dari Aset:</label>
         <select id="txAsset"></select>
       </div>
 
-      <!-- Pilihan Aset Khusus Transfer -->
       <div id="transferAccountGroup" style="display:none;">
         <div class="form-group">
           <label>Dari Sumber Aset</label>
@@ -334,7 +402,54 @@
         </div>
       </div>
 
-      <button class="btn-submit-action" id="submitTxBtn" onclick="saveTransaction()">Simpan Transaksi</button>
+      <button class="btn-submit-action" onclick="saveTransaction()">Simpan Transaksi</button>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Utang / Piutang -->
+  <div class="modal-overlay" id="debtModal" onclick="closeModalOnOut(event, 'debtModal')">
+    <div class="modal-sheet">
+      <div class="sheet-head">
+        <h3 style="font-size: 1rem; font-weight: 700;">Catat Pinjaman</h3>
+        <button class="icon-btn" onclick="closeModal('debtModal')">✕</button>
+      </div>
+      <div class="type-switcher">
+        <button class="type-btn active" id="debtTypePiutang" onclick="setDebtType('piutang')">Piutang (Kita Pinjamkan)</button>
+        <button class="type-btn" id="debtTypeUtang" onclick="setDebtType('utang')">Utang (Kita Pinjam)</button>
+      </div>
+      <div class="form-group">
+        <label>Nama Orang / Pihak</label>
+        <input type="text" id="debtPerson" placeholder="Contoh: Alif, Ryan, Toko Komponen">
+      </div>
+      <div class="form-group">
+        <label>Nominal (Rp)</label>
+        <input type="text" id="debtAmount" placeholder="0" inputmode="numeric" oninput="formatRupiahInput(this)">
+      </div>
+      <div class="form-group">
+        <label id="debtWalletLabel">Potong Saldo Dari (Sumber Uang):</label>
+        <select id="debtWallet"></select>
+      </div>
+      <div class="form-group">
+        <label>Keterangan / Keperluan</label>
+        <input type="text" id="debtNote" placeholder="Misal: Talangan makan siang">
+      </div>
+      <button class="btn-submit-action" onclick="saveNewDebt()">Simpan Buku Pinjaman</button>
+    </div>
+  </div>
+
+  <!-- Modal Pelunasan Utang / Piutang -->
+  <div class="modal-overlay" id="settleModal" onclick="closeModalOnOut(event, 'settleModal')">
+    <div class="modal-sheet">
+      <div class="sheet-head">
+        <h3 id="settleTitle" style="font-size: 1rem; font-weight: 700;">Pelunasan</h3>
+        <button class="icon-btn" onclick="closeModal('settleModal')">✕</button>
+      </div>
+      <p id="settleDetailText" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;"></p>
+      <div class="form-group">
+        <label id="settleWalletLabel">Uang Masuk Ke / Diambil Dari:</label>
+        <select id="settleWallet"></select>
+      </div>
+      <button class="btn-submit-action" onclick="confirmSettle()">Konfirmasi & Catat Transaksi</button>
     </div>
   </div>
 
@@ -354,11 +469,11 @@
       </div>
       <div class="form-group">
         <label>Nama Akun</label>
-        <input type="text" id="newAccName" placeholder="Contoh: BCA, BNI, Cash Lapangan">
+        <input type="text" id="newAccName" placeholder="Contoh: Seabank, Cash Nojorono">
       </div>
       <div class="form-group">
         <label>Saldo Awal (Rp)</label>
-        <input type="number" id="newAccBalance" value="0">
+        <input type="text" id="newAccBalance" placeholder="0" inputmode="numeric" oninput="formatRupiahInput(this)">
       </div>
       <button class="btn-submit-action" onclick="saveNewAccount()">Tambahkan Akun</button>
     </div>
@@ -370,34 +485,49 @@
       { id: 'acc_1', name: 'BNI Rekening Utama', type: 'bank', balance: 4521000 },
       { id: 'acc_2', name: 'Rekening Operasional', type: 'bank', balance: 1500000 },
       { id: 'acc_3', name: 'Cash Pribadi', type: 'cash', balance: 80000 },
-      { id: 'acc_4', name: 'Cash Ops Lapangan', type: 'cash', balance: 200000 }
+      { id: 'acc_4', name: 'Cash Nojorono', type: 'cash', balance: 200000 }
     ];
 
     let accounts = JSON.parse(localStorage.getItem('meld_accounts')) || defaultAccounts;
     let transactions = JSON.parse(localStorage.getItem('meld_transactions')) || [];
-    let currentTxType = 'expense';
+    let debts = JSON.parse(localStorage.getItem('meld_debts')) || [];
 
+    let currentTxType = 'expense';
+    let currentDebtType = 'piutang';
+    let activeSettleItem = null;
+
+    /* Utility Format Angka & Input Ribuan */
     function formatRupiah(num) {
-      return "Rp" + Number(num).toLocaleString("id-ID");
+      return "Rp" + Math.round(Number(num) || 0).toLocaleString("id-ID");
     }
 
-    function openActionMenu() {
-  document.getElementById('actionMenuModal').classList.add('open');
-}
+    function formatRupiahInput(input) {
+      let val = input.value.replace(/\D/g, '');
+      if (!val) { input.value = ''; return; }
+      input.value = Number(val).toLocaleString('id-ID');
+    }
+
+    function parseFormattedNumber(val) {
+      if (!val) return 0;
+      return parseFloat(String(val).replace(/\./g, '')) || 0;
+    }
 
     function saveState() {
       localStorage.setItem('meld_accounts', JSON.stringify(accounts));
       localStorage.setItem('meld_transactions', JSON.stringify(transactions));
+      localStorage.setItem('meld_debts', JSON.stringify(debts));
       renderAll();
     }
 
-    /* Tab Switching */
+    /* Tab Switching & Sidebar */
     function switchTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
 
-      document.getElementById('view-' + tabId).classList.add('active');
-      document.getElementById('tabBtn-' + tabId).classList.add('active');
+      const target = document.getElementById('view-' + tabId);
+      const btn = document.getElementById('tabBtn-' + tabId);
+      if (target) target.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
     function toggleSidebar() {
@@ -412,17 +542,20 @@
       }
     }
 
+    function openActionMenu() {
+      document.getElementById('actionMenuModal').classList.add('open');
+    }
+
     /* Render Logic */
     function renderAll() {
       let totalNet = 0;
       let totalInc = 0;
       let totalExp = 0;
 
-      // 1. Hitung Net Worth
-      accounts.forEach(a => totalNet += a.balance);
+      accounts.forEach(a => totalNet += parseFloat(a.balance));
       transactions.forEach(t => {
-        if (t.type === 'income') totalInc += t.amount;
-        if (t.type === 'expense') totalExp += t.amount;
+        if (t.type === 'income') totalInc += parseFloat(t.amount);
+        if (t.type === 'expense') totalExp += parseFloat(t.amount);
       });
 
       document.getElementById('netWorthDisplay').innerText = formatRupiah(totalNet);
@@ -430,7 +563,7 @@
       document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
       document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
 
-      // 2. Render Profil Aset (Bank & Cash)
+      // 1. Render Kartu Dompet di Tab Profil
       const bankCont = document.getElementById('bankAccountsList');
       const cashCont = document.getElementById('cashAccountsList');
       bankCont.innerHTML = '';
@@ -453,35 +586,140 @@
         else cashCont.innerHTML += itemHtml;
       });
 
-      // 3. Render Riwayat di Beranda & Tab Transaksi
+      // 2. Render Mutasi Style M-Banking (Group By Tanggal)
+      renderMBankingFeed();
+
+      // 3. Render Utang Piutang
+      renderDebtFeed();
+    }
+
+    /* Tampilan Mutasi Ala M-Banking */
+    function renderMBankingFeed() {
+      const feed = document.getElementById('mBankingTxFeed');
       const homeTx = document.getElementById('homeRecentTx');
-      const allTx = document.getElementById('allTxFeed');
+      feed.innerHTML = '';
       homeTx.innerHTML = '';
-      allTx.innerHTML = '';
 
       if (transactions.length === 0) {
-        homeTx.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:20px;">Belum ada catatan transaksi</p>';
-        allTx.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:20px;">Belum ada riwayat transaksi</p>';
-      } else {
-        transactions.forEach((tx, idx) => {
+        feed.innerHTML = '<p style="color:#94a3b8; font-size:0.85rem; text-align:center; padding:30px;">Belum ada riwayat mutasi.</p>';
+        homeTx.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:20px;">Belum ada transaksi.</p>';
+        return;
+      }
+
+      // Render 5 terkini di Beranda
+      transactions.slice(0, 5).forEach(tx => {
+        let cls = tx.type === 'income' ? 'tx-inc' : (tx.type === 'expense' ? 'tx-exp' : 'tx-tf');
+        let sign = tx.type === 'income' ? '+' : (tx.type === 'expense' ? '-' : '');
+        homeTx.innerHTML += `
+          <div class="tx-item">
+            <div class="tx-left">
+              <div class="tx-icon">${tx.type === 'income' ? '📥' : (tx.type === 'expense' ? '📤' : '🔁')}</div>
+              <div>
+                <div class="tx-title">${tx.desc}</div>
+                <div class="tx-sub">${tx.accountName} • ${tx.category} • ${tx.dateFormatted}</div>
+              </div>
+            </div>
+            <div class="tx-amount ${cls}">${sign}${formatRupiah(tx.amount)}</div>
+          </div>
+        `;
+      });
+
+      // Grouping per Tanggal di Tab Mutasi
+      const groups = {};
+      transactions.forEach(t => {
+        const d = t.rawDate || 'Hari Ini';
+        if (!groups[d]) groups[d] = [];
+        groups[d].push(t);
+      });
+
+      for (let dateKey in groups) {
+        const txList = groups[dateKey];
+        let dayNet = 0;
+        txList.forEach(item => {
+          if (item.type === 'income') dayNet += item.amount;
+          if (item.type === 'expense') dayNet -= item.amount;
+        });
+
+        let groupHtml = `
+          <div class="date-group">
+            <div class="date-header">
+              <span>📅 ${dateKey}</span>
+              <span style="color:${dayNet >= 0 ? 'var(--income-green)' : 'var(--expense-red)'}">
+                Net: ${dayNet >= 0 ? '+' : ''}${formatRupiah(dayNet)}
+              </span>
+            </div>
+        `;
+
+        txList.forEach(tx => {
           let cls = tx.type === 'income' ? 'tx-inc' : (tx.type === 'expense' ? 'tx-exp' : 'tx-tf');
           let sign = tx.type === 'income' ? '+' : (tx.type === 'expense' ? '-' : '');
-          let txHtml = `
+          groupHtml += `
             <div class="tx-item">
               <div class="tx-left">
                 <div class="tx-icon">${tx.type === 'income' ? '📥' : (tx.type === 'expense' ? '📤' : '🔁')}</div>
                 <div>
                   <div class="tx-title">${tx.desc}</div>
-                  <div class="tx-sub">${tx.accountName} • ${tx.category} • ${tx.date}</div>
+                  <div class="tx-sub">${tx.accountName} • ${tx.category} • ${tx.time || ''}</div>
                 </div>
               </div>
               <div class="tx-amount ${cls}">${sign}${formatRupiah(tx.amount)}</div>
             </div>
           `;
-          if (idx < 5) homeTx.innerHTML += txHtml;
-          allTx.innerHTML += txHtml;
         });
+
+        groupHtml += `</div>`;
+        feed.innerHTML += groupHtml;
       }
+    }
+
+    /* Render Utang & Piutang */
+    function renderDebtFeed() {
+      const pList = document.getElementById('piutangList');
+      const uList = document.getElementById('utangList');
+      pList.innerHTML = '';
+      uList.innerHTML = '';
+
+      let totPiutang = 0;
+      let totUtang = 0;
+
+      debts.forEach(d => {
+        if (!d.paid) {
+          if (d.type === 'piutang') totPiutang += d.amount;
+          if (d.type === 'utang') totUtang += d.amount;
+        }
+
+        const card = `
+          <div class="debt-item-card">
+            <div class="debt-top">
+              <div class="debt-person">${d.person}</div>
+              <span class="debt-badge ${d.paid ? 'badge-paid' : 'badge-unpaid'}">
+                ${d.paid ? 'LUNAS' : 'BELUM LUNAS'}
+              </span>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">${d.note} • ${d.date}</div>
+            <div style="font-size:1.1rem; font-weight:700; margin:6px 0; color:${d.type === 'piutang' ? 'var(--income-green)' : 'var(--expense-red)'}">
+              ${formatRupiah(d.amount)}
+            </div>
+            ${!d.paid ? `
+              <div class="debt-action-row">
+                <span style="font-size:0.75rem; color:var(--text-muted);">Sumber awal: ${d.walletName}</span>
+                <button class="btn-settle" onclick="openSettleModal('${d.id}')">
+                  ${d.type === 'piutang' ? 'Terima Pelunasan' : 'Bayar Sekarang'}
+                </button>
+              </div>
+            ` : `<div style="font-size:0.75rem; color:var(--income-green); font-weight:600; margin-top:6px;">✓ Telah dilunasi & tercatat di mutasi</div>`}
+          </div>
+        `;
+
+        if (d.type === 'piutang') pList.innerHTML += card;
+        else uList.innerHTML += card;
+      });
+
+      if (pList.innerHTML === '') pList.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem;">Tidak ada piutang aktif.</p>';
+      if (uList.innerHTML === '') uList.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem;">Tidak ada utang aktif.</p>';
+
+      document.getElementById('totalPiutangHome').innerText = formatRupiah(totPiutang);
+      document.getElementById('totalUtangHome').innerText = formatRupiah(totUtang);
     }
 
     /* Modal Catat Transaksi */
@@ -489,6 +727,10 @@
       currentTxType = type;
       setTxType(type);
       populateAccountOptions();
+
+      // Set default tanggal hari ini
+      const now = new Date();
+      document.getElementById('txDate').value = now.toISOString().split('T')[0];
       document.getElementById('txModal').classList.add('open');
     }
 
@@ -519,102 +761,251 @@
       const assetSel = document.getElementById('txAsset');
       const tfSrc = document.getElementById('tfSource');
       const tfTar = document.getElementById('tfTarget');
+      const dWallet = document.getElementById('debtWallet');
 
       assetSel.innerHTML = '';
       tfSrc.innerHTML = '';
       tfTar.innerHTML = '';
+      dWallet.innerHTML = '';
 
       accounts.forEach(a => {
         let opt = `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
         assetSel.innerHTML += opt;
         tfSrc.innerHTML += opt;
         tfTar.innerHTML += opt;
+        dWallet.innerHTML += opt;
       });
     }
 
-   function saveTransaction() {
-  const amtInput = document.getElementById('txAmount').value;
-  const amt = parseFloat(amtInput);
-  const desc = document.getElementById('txDesc').value.trim() || 'Transaksi';
-  const cat = document.getElementById('txCategory').value;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+    function saveTransaction() {
+      const amt = parseFormattedNumber(document.getElementById('txAmount').value);
+      const desc = document.getElementById('txDesc').value.trim() || 'Transaksi';
+      const cat = document.getElementById('txCategory').value;
+      const inputDate = document.getElementById('txDate').value;
 
-  if (isNaN(amt) || amt <= 0) {
-    return alert('Masukkan nominal valid lebih dari 0!');
-  }
+      if (!amt || amt <= 0) return alert('Masukkan nominal valid!');
 
-  if (currentTxType === 'transfer') {
-    const fromId = document.getElementById('tfSource').value;
-    const toId = document.getElementById('tfTarget').value;
+      const dateObj = inputDate ? new Date(inputDate) : new Date();
+      const rawDateStr = dateObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-    if (fromId === toId) {
-      return alert('Aset sumber dan tujuan tidak boleh sama!');
-    }
+      if (currentTxType === 'transfer') {
+        const fromId = document.getElementById('tfSource').value;
+        const toId = document.getElementById('tfTarget').value;
+        if (fromId === toId) return alert('Aset sumber dan tujuan tidak boleh sama!');
 
-    let fromAcc = accounts.find(a => a.id === fromId);
-    let toAcc = accounts.find(a => a.id === toId);
+        let fromAcc = accounts.find(a => a.id === fromId);
+        let toAcc = accounts.find(a => a.id === toId);
 
-    if (parseFloat(fromAcc.balance) < amt) {
-      return alert('Saldo di akun ' + fromAcc.name + ' tidak cukup! Sisa saldo: ' + formatRupiah(fromAcc.balance));
-    }
+        if (fromAcc.balance < amt) return alert('Saldo di ' + fromAcc.name + ' tidak mencukupi!');
+        fromAcc.balance = parseFloat(fromAcc.balance) - amt;
+        toAcc.balance = parseFloat(toAcc.balance) + amt;
 
-    // Pastikan operasi matematika murni (angka dikurangi angka)
-    fromAcc.balance = parseFloat(fromAcc.balance) - amt;
-    toAcc.balance = parseFloat(toAcc.balance) + amt;
+        transactions.unshift({
+          id: Date.now(),
+          desc: desc,
+          amount: amt,
+          type: 'transfer',
+          category: 'Pindah Saldo',
+          accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
+          rawDate: rawDateStr,
+          dateFormatted: rawDateStr,
+          time: timeStr
+        });
+      } else {
+        const targetId = document.getElementById('txAsset').value;
+        let targetAcc = accounts.find(a => a.id === targetId);
 
-    transactions.unshift({
-      id: Date.now(),
-      desc: desc,
-      amount: amt,
-      type: 'transfer',
-      category: 'Pindah Saldo',
-      accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
-      date: dateStr
-    });
+        if (currentTxType === 'expense') {
+          if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup! Sisa: ' + formatRupiah(targetAcc.balance));
+          targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+        } else {
+          targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+        }
 
-  } else {
-    const targetId = document.getElementById('txAsset').value;
-    let targetAcc = accounts.find(a => a.id === targetId);
-
-    if (!targetAcc) {
-      return alert('Pilih dompet/rekening tujuan terlebih dahulu!');
-    }
-
-    if (currentTxType === 'expense') {
-      if (parseFloat(targetAcc.balance) < amt) {
-        return alert('Saldo di ' + targetAcc.name + ' tidak cukup! Sisa: ' + formatRupiah(targetAcc.balance));
+        transactions.unshift({
+          id: Date.now(),
+          desc: desc,
+          amount: amt,
+          type: currentTxType,
+          category: cat,
+          accountName: targetAcc.name,
+          rawDate: rawDateStr,
+          dateFormatted: rawDateStr,
+          time: timeStr
+        });
       }
-      // PENGURANGAN SALDO OTOMATIS
-      targetAcc.balance = parseFloat(targetAcc.balance) - amt;
-    } else if (currentTxType === 'income') {
-      // PENAMBAHAN SALDO OTOMATIS
-      targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txDesc').value = '';
+      closeModal('txModal');
+      saveState();
     }
 
-    transactions.unshift({
-      id: Date.now(),
-      desc: desc,
-      amount: amt,
-      type: currentTxType,
-      category: cat,
-      accountName: targetAcc.name,
-      date: dateStr
-    });
-  }
+    /* Utang & Piutang Logic */
+    function openNewDebtModal() {
+      populateAccountOptions();
+      setDebtType('piutang');
+      document.getElementById('debtModal').classList.add('open');
+    }
 
-  // Bersihkan form
-  document.getElementById('txAmount').value = '';
-  document.getElementById('txDesc').value = '';
-  
-  // Tutup popup modal
-  closeModal('txModal');
-  
-  // SIMPAN PERUBAHAN KE LOCALSTORAGE & RENDER ULANG TAMPILAN
-  saveState();
-}
+    function setDebtType(type) {
+      currentDebtType = type;
+      if (type === 'piutang') {
+        document.getElementById('debtTypePiutang').classList.add('active');
+        document.getElementById('debtTypeUtang').classList.remove('active');
+        document.getElementById('debtWalletLabel').innerText = 'Potong Saldo Dari (Uang Keluar):';
+      } else {
+        document.getElementById('debtTypeUtang').classList.add('active');
+        document.getElementById('debtTypePiutang').classList.remove('active');
+        document.getElementById('debtWalletLabel').innerText = 'Terima Uang Pinjaman Ke (Uang Masuk):';
+      }
+    }
 
-    /* Modal Tambah Akun */
+    function saveNewDebt() {
+      const person = document.getElementById('debtPerson').value.trim();
+      const amt = parseFormattedNumber(document.getElementById('debtAmount').value);
+      const note = document.getElementById('debtNote').value.trim() || 'Pinjaman';
+      const wId = document.getElementById('debtWallet').value;
+      const targetAcc = accounts.find(a => a.id === wId);
+
+      if (!person) return alert('Masukkan nama orang / pihak!');
+      if (!amt || amt <= 0) return alert('Masukkan nominal pinjaman!');
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      const rawDateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+      // Jika piutang (kita pinjamkan uang), saldo kita berkurang & tercatat di mutasi pengeluaran
+      if (currentDebtType === 'piutang') {
+        if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk memberi pinjaman!');
+        targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: `[Piutang] Pinjamkan ke ${person} (${note})`,
+          amount: amt,
+          type: 'expense',
+          category: 'Pinjaman / Piutang',
+          accountName: targetAcc.name,
+          rawDate: rawDateStr,
+          dateFormatted: dateStr,
+          time: timeStr
+        });
+      } else {
+        // Jika kita yang utang, saldo kita bertambah karena nerima pinjaman
+        targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: `[Utang] Terima pinjaman dari ${person} (${note})`,
+          amount: amt,
+          type: 'income',
+          category: 'Penerimaan Utang',
+          accountName: targetAcc.name,
+          rawDate: rawDateStr,
+          dateFormatted: dateStr,
+          time: timeStr
+        });
+      }
+
+      debts.unshift({
+        id: 'd_' + Date.now(),
+        person: person,
+        amount: amt,
+        type: currentDebtType,
+        walletName: targetAcc.name,
+        walletId: targetAcc.id,
+        note: note,
+        date: dateStr,
+        paid: false
+      });
+
+      document.getElementById('debtPerson').value = '';
+      document.getElementById('debtAmount').value = '';
+      document.getElementById('debtNote').value = '';
+      closeModal('debtModal');
+      saveState();
+    }
+
+    /* Pelunasan Utang Piutang */
+    function openSettleModal(debtId) {
+      activeSettleItem = debts.find(d => d.id === debtId);
+      if (!activeSettleItem) return;
+
+      const sel = document.getElementById('settleWallet');
+      sel.innerHTML = '';
+      accounts.forEach(a => {
+        sel.innerHTML += `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
+      });
+
+      if (activeSettleItem.type === 'piutang') {
+        document.getElementById('settleTitle').innerText = 'Penerimaan Pembayaran Piutang';
+        document.getElementById('settleDetailText').innerText = `${activeSettleItem.person} melunasi sebesar ${formatRupiah(activeSettleItem.amount)}`;
+        document.getElementById('settleWalletLabel').innerText = 'Uang Masuk Ke Dompet/Rekening:';
+      } else {
+        document.getElementById('settleTitle').innerText = 'Pembayaran Utang';
+        document.getElementById('settleDetailText').innerText = `Membayar utang ke ${activeSettleItem.person} sebesar ${formatRupiah(activeSettleItem.amount)}`;
+        document.getElementById('settleWalletLabel').innerText = 'Bayar Menggunakan Saldo Dari:';
+      }
+
+      document.getElementById('settleModal').classList.add('open');
+    }
+
+    function confirmSettle() {
+      if (!activeSettleItem) return;
+
+      const wId = document.getElementById('settleWallet').value;
+      const targetAcc = accounts.find(a => a.id === wId);
+      const amt = activeSettleItem.amount;
+
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      const rawDateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+      if (activeSettleItem.type === 'piutang') {
+        // Piutang dibayar: uang masuk ke dompet yang dipilih
+        targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: `[Lunas Piutang] Pengembalian dari ${activeSettleItem.person}`,
+          amount: amt,
+          type: 'income',
+          category: 'Pelunasan Piutang',
+          accountName: targetAcc.name,
+          rawDate: rawDateStr,
+          dateFormatted: dateStr,
+          time: timeStr
+        });
+      } else {
+        // Utang dibayar: uang keluar dari dompet yang dipilih
+        if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk membayar utang!');
+        targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: `[Bayar Utang] Pelunasan utang ke ${activeSettleItem.person}`,
+          amount: amt,
+          type: 'expense',
+          category: 'Bayar Utang',
+          accountName: targetAcc.name,
+          rawDate: rawDateStr,
+          dateFormatted: dateStr,
+          time: timeStr
+        });
+      }
+
+      activeSettleItem.paid = true;
+      closeModal('settleModal');
+      saveState();
+      alert('Transaksi pelunasan berhasil dicatat!');
+    }
+
+    /* Modal Tambah Rekening/Dompet Baru */
     function openNewAccountModal() {
       document.getElementById('accModal').classList.add('open');
     }
@@ -622,7 +1013,7 @@
     function saveNewAccount() {
       const name = document.getElementById('newAccName').value.trim();
       const type = document.getElementById('newAccType').value;
-      const bal = parseFloat(document.getElementById('newAccBalance').value) || 0;
+      const bal = parseFormattedNumber(document.getElementById('newAccBalance').value);
 
       if (!name) return alert('Nama akun wajib diisi!');
 
@@ -634,7 +1025,7 @@
       });
 
       document.getElementById('newAccName').value = '';
-      document.getElementById('newAccBalance').value = '0';
+      document.getElementById('newAccBalance').value = '';
       closeModal('accModal');
       saveState();
     }
@@ -648,10 +1039,10 @@
     }
 
     function exportBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ accounts, transactions }, null, 2));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ accounts, transactions, debts }, null, 2));
       const dl = document.createElement('a');
       dl.setAttribute("href", dataStr);
-      dl.setAttribute("download", `meld_backup_${Date.now()}.json`);
+      dl.setAttribute("download", `dompet_backup_${Date.now()}.json`);
       dl.click();
     }
 

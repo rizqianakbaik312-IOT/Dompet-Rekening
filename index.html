@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dompet & Kas Ops Mandiri</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+      --primary: #38bdf8; --border: #334155; --danger: #f87171; --success: #4ade80;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; max-width: 600px; margin: auto; }
+    h1 { font-size: 1.25rem; margin-bottom: 12px; }
+    h2 { font-size: 1rem; margin-bottom: 8px; color: var(--primary); }
+
+    .grid-accounts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .acc-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+    .acc-title { font-size: 0.8rem; color: #94a3b8; }
+    .acc-balance { font-size: 1.1rem; font-weight: bold; margin-top: 4px; }
+
+    .action-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 10px; }
+    label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
+    input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: #fff; font-size: 0.9rem; }
+    button { width: 100%; padding: 10px; background: var(--primary); border: none; border-radius: 6px; color: #0f172a; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-top: 6px; }
+    button:active { opacity: 0.8; }
+
+    .log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .log-transfer { color: var(--primary); }
+    .text-success { color: var(--success); }
+    .text-danger { color: var(--danger); }
+  </style>
+</head>
+<body>
+
+  <h1>💰 Dompet & Kas Ops</h1>
+
+  <!-- Saldo Tiap Dompet -->
+  <div class="grid-accounts" id="accountGrid"></div>
+
+  <!-- Form Transfer Antar Rekening/Dompet -->
+  <div class="action-box">
+    <h2>Pindah Saldo (Transfer)</h2>
+    <div class="form-group">
+      <label>Dari:</label>
+      <select id="fromAcc"></select>
+    </div>
+    <div class="form-group">
+      <label>Ke:</label>
+      <select id="toAcc"></select>
+    </div>
+    <div class="form-group">
+      <label>Nominal (Rp):</label>
+      <input type="number" id="transferAmount" placeholder="Contoh: 150000">
+    </div>
+    <div class="form-group">
+      <label>Keterangan:</label>
+      <input type="text" id="transferNote" placeholder="Misal: Rembes ops / tarik tunai">
+    </div>
+    <button onclick="handleTransfer()">Pindahkan Saldo</button>
+  </div>
+
+  <!-- Form Transaksi Cepat -->
+  <div class="action-box">
+    <h2>Catat Masuk / Keluar</h2>
+    <div class="form-group">
+      <label>Akun Dompet:</label>
+      <select id="quickAcc"></select>
+    </div>
+    <div class="form-group">
+      <label>Tipe:</label>
+      <select id="quickType">
+        <option value="expense">Pengeluaran (-)</option>
+        <option value="income">Pemasukan (+)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nominal (Rp):</label>
+      <input type="number" id="quickAmount" placeholder="Contoh: 25000">
+    </div>
+    <div class="form-group">
+      <label>Keterangan:</label>
+      <input type="text" id="quickNote" placeholder="Misal: Beli makan siang / transport">
+    </div>
+    <button onclick="handleQuickEntry()">Simpan Transaksi</button>
+  </div>
+
+  <!-- Riwayat Transaksi -->
+  <div class="action-box">
+    <h2>Riwayat Terakhir</h2>
+    <div id="logList"></div>
+  </div>
+
+  <script>
+    const defaultAccounts = {
+      "rek_pribadi": { name: "Rekening Pribadi", balance: 0 },
+      "rek_ops": { name: "Rekening Ops", balance: 0 },
+      "cash_pribadi": { name: "Cash Pribadi", balance: 0 },
+      "cash_ops": { name: "Cash Ops", balance: 0 }
+    };
+
+    let accounts = JSON.parse(localStorage.getItem('wallets')) || defaultAccounts;
+    let logs = JSON.parse(localStorage.getItem('wallet_logs')) || [];
+
+    function formatRupiah(num) {
+      return "Rp " + Number(num).toLocaleString("id-ID");
+    }
+
+    function saveState() {
+      localStorage.setItem('wallets', JSON.stringify(accounts));
+      localStorage.setItem('wallet_logs', JSON.stringify(logs));
+      render();
+    }
+
+    function render() {
+      const grid = document.getElementById('accountGrid');
+      grid.innerHTML = '';
+      const fromSelect = document.getElementById('fromAcc');
+      const toSelect = document.getElementById('toAcc');
+      const quickSelect = document.getElementById('quickAcc');
+      
+      fromSelect.innerHTML = '';
+      toSelect.innerHTML = '';
+      quickSelect.innerHTML = '';
+
+      for (let key in accounts) {
+        const acc = accounts[key];
+        grid.innerHTML += `
+          <div class="acc-card">
+            <div class="acc-title">${acc.name}</div>
+            <div class="acc-balance">${formatRupiah(acc.balance)}</div>
+          </div>
+        `;
+        fromSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
+        toSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
+        quickSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
+      }
+
+      const logList = document.getElementById('logList');
+      logList.innerHTML = logs.length === 0 ? '<p style="color:#64748b; font-size:0.85rem;">Belum ada riwayat transaksi</p>' : '';
+      logs.slice(0, 10).forEach(item => {
+        logList.innerHTML += `
+          <div class="log-item">
+            <span>${item.desc}</span>
+            <strong class="${item.type === 'transfer' ? 'log-transfer' : (item.type === 'income' ? 'text-success' : 'text-danger')}">
+              ${item.amount}
+            </strong>
+          </div>
+        `;
+      });
+    }
+
+    function handleTransfer() {
+      const from = document.getElementById('fromAcc').value;
+      const to = document.getElementById('toAcc').value;
+      const amt = parseFloat(document.getElementById('transferAmount').value);
+      const note = document.getElementById('transferNote').value || 'Pindah Saldo';
+
+      if (!amt || amt <= 0) return alert("Masukkan nominal yang valid!");
+      if (from === to) return alert("Akun asal dan tujuan tidak boleh sama!");
+      if (accounts[from].balance < amt) return alert("Saldo di akun asal tidak mencukupi!");
+
+      accounts[from].balance -= amt;
+      accounts[to].balance += amt;
+
+      logs.unshift({
+        type: 'transfer',
+        desc: `[Pindah] ${accounts[from].name} ➔ ${accounts[to].name} (${note})`,
+        amount: formatRupiah(amt)
+      });
+
+      document.getElementById('transferAmount').value = '';
+      document.getElementById('transferNote').value = '';
+      saveState();
+    }
+
+    function handleQuickEntry() {
+      const target = document.getElementById('quickAcc').value;
+      const type = document.getElementById('quickType').value;
+      const amt = parseFloat(document.getElementById('quickAmount').value);
+      const note = document.getElementById('quickNote').value || (type === 'income' ? 'Pemasukan' : 'Pengeluaran');
+
+      if (!amt || amt <= 0) return alert("Masukkan nominal yang valid!");
+
+      if (type === 'expense') {
+        if (accounts[target].balance < amt) return alert("Saldo tidak mencukupi!");
+        accounts[target].balance -= amt;
+        logs.unshift({ type: 'expense', desc: `[-] ${accounts[target].name}: ${note}`, amount: `-${formatRupiah(amt)}` });
+      } else {
+        accounts[target].balance += amt;
+        logs.unshift({ type: 'income', desc: `[+] ${accounts[target].name}: ${note}`, amount: `+${formatRupiah(amt)}` });
+      }
+
+      document.getElementById('quickAmount').value = '';
+      document.getElementById('quickNote').value = '';
+      saveState();
+    }
+
+    render();
+  </script>
+</body>
+</html>

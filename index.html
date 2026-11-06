@@ -189,6 +189,91 @@
     .nav-tab.active { color: var(--primary-blue); }
     .nav-tab i { font-size: 1.2rem; }
 
+    /* Wadah Utama Geser / Swipe Horizontal */
+    .view-content {
+      width: 100%;
+      max-width: 520px;
+      margin: auto;
+      padding: 0; /* Padding dipindah ke dalam halaman */
+      overflow-x: hidden;
+    }
+
+    .swipe-track {
+      display: flex;
+      width: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Sembunyikan scrollbar di Firefox */
+    }
+    .swipe-track::-webkit-scrollbar {
+      display: none; /* Sembunyikan scrollbar di Chrome/Safari */
+    }
+
+    /* Setiap Halaman Tab */
+    .tab-view {
+      display: block !important; /* Tetap aktif di dalam track */
+      min-width: 100%;
+      max-width: 100%;
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      padding: 16px;
+      min-height: calc(100vh - 160px);
+    }
+
+    /* Bottom Navbar Simetris & Lurus Presisi */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--nav-bg);
+      border-top: 1px solid var(--border);
+      height: 65px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 40;
+      max-width: 520px;
+      margin: auto;
+    }
+
+    .nav-tab {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-top: 3px solid transparent; /* Penyeimbang garis */
+      transition: all 0.2s ease;
+    }
+
+    .nav-tab.active {
+      color: var(--primary-blue);
+      border-top: 3px solid var(--primary-blue);
+    }
+
+    /* Merapikan Tombol Melayang agar Tidak Bikin Miring */
+    .fab-group {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 30;
+    }
+
     /* Modal Bottom Sheet */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.open { display: flex; }
@@ -274,88 +359,90 @@
 
   <!-- Main View Screens -->
   <div class="view-content">
+    <div class="swipe-track" id="swipeTrack">
 
-    <!-- 1. TAB BERANDA -->
-    <div class="tab-view active" id="view-beranda">
-      <div class="net-worth-box">
-        <div class="net-title">TOTAL UANG SAYA (NET WORTH)</div>
-        <div class="net-val" id="netWorthDisplay">Rp 0</div>
-        
-        <div class="inc-exp-grid">
-          <div class="inc-exp-item">
-            <span>Pemasukan</span>
-            <strong style="color:var(--income-green)" id="homeIncomeDisplay">+Rp 0</strong>
+      <!-- 1. TAB BERANDA -->
+      <div class="tab-view active" id="view-beranda">
+        <div class="net-worth-box">
+          <div class="net-title">TOTAL UANG SAYA (NET WORTH)</div>
+          <div class="net-val" id="netWorthDisplay">Rp 0</div>
+          
+          <div class="inc-exp-grid">
+            <div class="inc-exp-item">
+              <span>Pemasukan</span>
+              <strong style="color:var(--income-green)" id="homeIncomeDisplay">+Rp 0</strong>
+            </div>
+            <div class="inc-exp-item">
+              <span>Pengeluaran</span>
+              <strong style="color:var(--expense-red)" id="homeExpenseDisplay">-Rp 0</strong>
+            </div>
           </div>
-          <div class="inc-exp-item">
-            <span>Pengeluaran</span>
-            <strong style="color:var(--expense-red)" id="homeExpenseDisplay">-Rp 0</strong>
+
+          <div class="wallet-breakdown-card">
+            <div class="breakdown-title">Akumulasi Saldo per Bank & Kas:</div>
+            <div id="homeWalletBreakdown"></div>
           </div>
         </div>
 
-        <div class="wallet-breakdown-card">
-          <div class="breakdown-title">Akumulasi Saldo per Bank & Kas:</div>
-          <div id="homeWalletBreakdown"></div>
+        <div class="debt-summary-grid">
+          <div class="debt-card" onclick="switchTab('utangpiutang')">
+            <div class="debt-card-title">Piutang (Orang Utang ke Kita)</div>
+            <div class="debt-card-val" style="color:var(--income-green)" id="totalPiutangHome">Rp 0</div>
+          </div>
+          <div class="debt-card" onclick="switchTab('utangpiutang')">
+            <div class="debt-card-title">Utang (Kita Minjam)</div>
+            <div class="debt-card-val" style="color:var(--expense-red)" id="totalUtangHome">Rp 0</div>
+          </div>
         </div>
+
+        <h3 style="font-size:0.95rem; margin-bottom:12px;">Transaksi Terkini</h3>
+        <div id="homeRecentTx"></div>
       </div>
 
-      <div class="debt-summary-grid">
-        <div class="debt-card" onclick="switchTab('utangpiutang')">
-          <div class="debt-card-title">Piutang (Orang Utang ke Kita)</div>
-          <div class="debt-card-val" style="color:var(--income-green)" id="totalPiutangHome">Rp 0</div>
+      <!-- 2. TAB TRANSAKSI -->
+      <div class="tab-view" id="view-transaksi">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+          <h2 style="font-size: 1.1rem; font-weight: 700;">Mutasi Rekening</h2>
+          <span style="font-size:0.75rem; color:var(--text-muted);" id="txCountBadge">0 Transaksi</span>
         </div>
-        <div class="debt-card" onclick="switchTab('utangpiutang')">
-          <div class="debt-card-title">Utang (Kita Minjam)</div>
-          <div class="debt-card-val" style="color:var(--expense-red)" id="totalUtangHome">Rp 0</div>
-        </div>
+        <div id="mBankingTxFeed"></div>
       </div>
 
-      <h3 style="font-size:0.95rem; margin-bottom:12px;">Transaksi Terkini</h3>
-      <div id="homeRecentTx"></div>
+      <!-- 3. TAB UTANG & PIUTANG -->
+      <div class="tab-view" id="view-utangpiutang">
+        <div class="asset-header-bar">
+          <div>
+            <h2 style="font-size:1.1rem; font-weight:700;">Buku Utang Piutang</h2>
+            <p style="font-size:0.75rem; color:var(--text-muted);">Pantau pinjaman & pengembalian</p>
+          </div>
+          <button class="btn-blue" onclick="openNewDebtModal()">+ Tambah Catatan</button>
+        </div>
+
+        <div class="asset-section-title">Piutang Aktif (Uang di Orang Lain)</div>
+        <div id="piutangList"></div>
+
+        <div class="asset-section-title" style="margin-top:20px;">Utang Aktif (Kewajiban Bayar)</div>
+        <div id="utangList"></div>
+      </div>
+
+      <!-- 4. TAB PROFIL -->
+      <div class="tab-view" id="view-profil">
+        <div class="asset-header-bar">
+          <div>
+            <h2 style="font-size:1.1rem; font-weight:700;">Profil Rekening & Kas</h2>
+            <p style="font-size:0.75rem; color:var(--text-muted);">Klik akun untuk Edit atau Hapus</p>
+          </div>
+          <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Akun</button>
+        </div>
+
+        <div class="asset-section-title">Rekening Bank & E-Wallet</div>
+        <div id="bankAccountsList"></div>
+
+        <div class="asset-section-title">Uang Tunai / Cash Fisik</div>
+        <div id="cashAccountsList"></div>
+      </div>
+
     </div>
-
-    <!-- 2. TAB TRANSAKSI -->
-    <div class="tab-view" id="view-transaksi">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
-        <h2 style="font-size: 1.1rem; font-weight: 700;">Mutasi Rekening</h2>
-        <span style="font-size:0.75rem; color:var(--text-muted);" id="txCountBadge">0 Transaksi</span>
-      </div>
-      <div id="mBankingTxFeed"></div>
-    </div>
-
-    <!-- 3. TAB UTANG & PIUTANG -->
-    <div class="tab-view" id="view-utangpiutang">
-      <div class="asset-header-bar">
-        <div>
-          <h2 style="font-size:1.1rem; font-weight:700;">Buku Utang Piutang</h2>
-          <p style="font-size:0.75rem; color:var(--text-muted);">Pantau pinjaman & pengembalian</p>
-        </div>
-        <button class="btn-blue" onclick="openNewDebtModal()">+ Tambah Catatan</button>
-      </div>
-
-      <div class="asset-section-title">Piutang Aktif (Uang di Orang Lain)</div>
-      <div id="piutangList"></div>
-
-      <div class="asset-section-title" style="margin-top:20px;">Utang Aktif (Kewajiban Bayar)</div>
-      <div id="utangList"></div>
-    </div>
-
-    <!-- 4. TAB PROFIL -->
-    <div class="tab-view" id="view-profil">
-      <div class="asset-header-bar">
-        <div>
-          <h2 style="font-size:1.1rem; font-weight:700;">Profil Rekening & Kas</h2>
-          <p style="font-size:0.75rem; color:var(--text-muted);">Klik akun untuk Edit atau Hapus</p>
-        </div>
-        <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Akun</button>
-      </div>
-
-      <div class="asset-section-title">Rekening Bank & E-Wallet</div>
-      <div id="bankAccountsList"></div>
-
-      <div class="asset-section-title">Uang Tunai / Cash Fisik</div>
-      <div id="cashAccountsList"></div>
-    </div>
-
   </div>
 
   <!-- Bottom Floating Action Buttons -->
@@ -829,14 +916,31 @@
       renderAll();
     }
 
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
-      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+    const TAB_INDEX_MAP = {
+      'beranda': 0,
+      'transaksi': 1,
+      'utangpiutang': 2,
+      'profil': 3
+    };
 
-      const target = document.getElementById('view-' + tabId);
-      const btn = document.getElementById('tabBtn-' + tabId);
-      if (target) target.classList.add('active');
-      if (btn) btn.classList.add('active');
+    const INDEX_TAB_MAP = ['beranda', 'transaksi', 'utangpiutang', 'profil'];
+
+    function switchTab(tabId) {
+      const idx = TAB_INDEX_MAP[tabId];
+      const track = document.getElementById('swipeTrack');
+      if (track) {
+        track.scrollTo({
+          left: idx * track.clientWidth,
+          behavior: 'smooth'
+        });
+      }
+      updateActiveNavTab(tabId);
+    }
+
+    function updateActiveNavTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+      const activeBtn = document.getElementById('tabBtn-' + tabId);
+      if (activeBtn) activeBtn.classList.add('active');
     }
 
     function toggleSidebar() {
@@ -1621,6 +1725,24 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js');
     }
+    
+    const swipeTrack = document.getElementById('swipeTrack');
+    if (swipeTrack) {
+      let isScrolling = null;
+      swipeTrack.addEventListener('scroll', () => {
+        clearTimeout(isScrolling);
+        isScrolling = setTimeout(() => {
+          const width = swipeTrack.clientWidth;
+          const currentScroll = swipeTrack.scrollLeft;
+          const activeIndex = Math.round(currentScroll / width);
+          const currentTabId = INDEX_TAB_MAP[activeIndex];
+          if (currentTabId) {
+            updateActiveNavTab(currentTabId);
+          }
+        }, 60);
+      }, { passive: true });
+    }
+
   </script>
 </body>
 </html>

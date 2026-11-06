@@ -62,17 +62,48 @@
     .inc-exp-item span { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 2px; }
     .inc-exp-item strong { font-size: 0.95rem; }
 
-    /* Breakdown Dana di Beranda */
+    /* Breakdown Pos Saldo di Beranda */
     .wallet-breakdown-card {
       border-top: 1px dashed #334155; padding-top: 12px; margin-top: 8px;
     }
     .breakdown-title { font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-    .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .breakdown-item {
-      background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column;
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
     }
-    .breakdown-item .b-name { font-size: 0.75rem; color: #cbd5e1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .breakdown-item .b-bal { font-size: 0.85rem; color: #fff; font-weight: 700; margin-top: 2px; }
+    .breakdown-item {
+      background: rgba(255,255,255,0.08);
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .breakdown-item .b-name {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      font-weight: 600;
+      white-space: normal;
+      word-break: break-word;
+    }
+    .breakdown-item .b-bal {
+      font-size: 0.82rem;
+      color: #fff;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 450px) {
+      .breakdown-grid { grid-template-columns: repeat(2, 1fr); }
+      .breakdown-item { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (min-width: 900px) {
+      .view-content { max-width: 860px; }
+      .breakdown-grid { grid-template-columns: repeat(3, 1fr); }
+    }
 
     /* Utang Piutang Summary Cards */
     .debt-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
@@ -164,9 +195,19 @@
 
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-    .form-group input, .form-group select {
-      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.95rem; outline: none; background: #fff;
+    
+    /* Format input & select yang lebih proporsional di HP */
+    .form-group input {
+      width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff;
     }
+    .form-group select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; outline: none; background: #fff;
+      line-height: 1.4; color: #1e293b; font-weight: 500;
+    }
+    .form-group select option {
+      font-size: 0.82rem; padding: 6px;
+    }
+
     .btn-submit-action {
       width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary-blue); color: #fff;
       font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px;
@@ -480,19 +521,19 @@
       </div>
       <div class="form-group">
         <label>Nama Orang / Pihak</label>
-        <input type="text" id="debtPerson" placeholder="Contoh: Alif, Ryan, Toko Komponen">
+        <input type="text" id="debtPerson" placeholder="Contoh: Ryan ob jastek, Alif">
       </div>
       <div class="form-group">
         <label>Nominal (Rp)</label>
         <input type="text" id="debtAmount" placeholder="0" inputmode="numeric" oninput="formatRupiahInput(this)">
       </div>
       <div class="form-group">
-        <label id="debtWalletLabel">Potong Saldo Dari (Sumber Uang):</label>
+        <label id="debtWalletLabel">Pilih Sumber Rekening / Cash:</label>
         <select id="debtWallet"></select>
       </div>
       <div class="form-group">
         <label>Keterangan / Keperluan</label>
-        <input type="text" id="debtNote" placeholder="Misal: Talangan makan siang">
+        <input type="text" id="debtNote" placeholder="Misal: Talangan makan siang, Cooler hp">
       </div>
       <button class="btn-submit-action" onclick="saveNewDebt()">Simpan Buku Pinjaman</button>
     </div>
@@ -530,7 +571,7 @@
       </div>
       <div class="form-group">
         <label>Nama Akun</label>
-        <input type="text" id="newAccName" placeholder="Contoh: Seabank, Cash Nojorono">
+        <input type="text" id="newAccName" placeholder="Contoh: Seabank, Cash Ops">
       </div>
       <div class="form-group">
         <label>Saldo Awal (Rp)</label>
@@ -876,6 +917,10 @@
       tfTar.innerHTML = '';
       dWallet.innerHTML = '';
 
+      // Opsi khusus untuk penyesuaian saldo pada buku utang piutang
+      let adjustOpt = `<option value="none">⚡ [Tanpa Potong/Tambah Saldo] Catat Buku Saja</option>`;
+      dWallet.innerHTML += adjustOpt;
+
       accounts.forEach(a => {
         let opt = `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
         assetSel.innerHTML += opt;
@@ -898,6 +943,8 @@
       const now = new Date();
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
+      let sourceName = '';
+
       if (currentTxType === 'transfer') {
         const fromId = document.getElementById('tfSource').value;
         const toId = document.getElementById('tfTarget').value;
@@ -910,13 +957,15 @@
         fromAcc.balance = parseFloat(fromAcc.balance) - amt;
         toAcc.balance = parseFloat(toAcc.balance) + amt;
 
+        sourceName = `${fromAcc.name} ➔ ${toAcc.name}`;
+
         transactions.unshift({
           id: Date.now(),
           desc: desc,
           amount: amt,
           type: 'transfer',
           category: 'Pindah Saldo',
-          accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
+          accountName: sourceName,
           rawDate: rawDateStr,
           dateFormatted: rawDateStr,
           time: timeStr
@@ -932,13 +981,15 @@
           targetAcc.balance = parseFloat(targetAcc.balance) + amt;
         }
 
+        sourceName = targetAcc.name;
+
         transactions.unshift({
           id: Date.now(),
           desc: desc,
           amount: amt,
           type: currentTxType,
           category: cat,
-          accountName: targetAcc.name,
+          accountName: sourceName,
           rawDate: rawDateStr,
           dateFormatted: rawDateStr,
           time: timeStr
@@ -948,8 +999,11 @@
       document.getElementById('txAmount').value = '';
       document.getElementById('txDesc').value = '';
       closeModal('txModal');
-      let notifMsg = `${desc}: ${formatRupiah(amt)}`;
+
+      // Notifikasi lengkap dengan nama rekening/cash
+      let notifMsg = `${desc}: ${formatRupiah(amt)} via ${sourceName}`;
       triggerLocalNotification("Dompet & Ops: Transaksi Berhasil", notifMsg);
+
       saveState();
     }
 
@@ -1041,11 +1095,11 @@
       if (type === 'piutang') {
         document.getElementById('debtTypePiutang').classList.add('active');
         document.getElementById('debtTypeUtang').classList.remove('active');
-        document.getElementById('debtWalletLabel').innerText = 'Potong Saldo Dari (Uang Keluar):';
+        document.getElementById('debtWalletLabel').innerText = 'Potong Saldo Dari:';
       } else {
         document.getElementById('debtTypeUtang').classList.add('active');
         document.getElementById('debtTypePiutang').classList.remove('active');
-        document.getElementById('debtWalletLabel').innerText = 'Terima Uang Pinjaman Ke (Uang Masuk):';
+        document.getElementById('debtWalletLabel').innerText = 'Terima Uang Pinjaman Ke:';
       }
     }
 
@@ -1054,7 +1108,6 @@
       const amt = parseFormattedNumber(document.getElementById('debtAmount').value);
       const note = document.getElementById('debtNote').value.trim() || 'Pinjaman';
       const wId = document.getElementById('debtWallet').value;
-      const targetAcc = accounts.find(a => a.id === wId);
 
       if (!person) return alert('Masukkan nama orang / pihak!');
       if (!amt || amt <= 0) return alert('Masukkan nominal pinjaman!');
@@ -1064,35 +1117,44 @@
       const rawDateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-      if (currentDebtType === 'piutang') {
-        if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk memberi pinjaman!');
-        targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+      let walletName = 'Penyesuaian Saldo (Buku Saja)';
 
-        transactions.unshift({
-          id: Date.now(),
-          desc: `[Piutang] Pinjamkan ke ${person} (${note})`,
-          amount: amt,
-          type: 'expense',
-          category: 'Pinjaman / Piutang',
-          accountName: targetAcc.name,
-          rawDate: rawDateStr,
-          dateFormatted: dateStr,
-          time: timeStr
-        });
-      } else {
-        targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+      // Jika user memilih memotong rekening sungguhan (bukan penyesuaian)
+      if (wId !== 'none') {
+        const targetAcc = accounts.find(a => a.id === wId);
+        if (!targetAcc) return alert('Pilih akun valid!');
+        walletName = targetAcc.name;
 
-        transactions.unshift({
-          id: Date.now(),
-          desc: `[Utang] Terima pinjaman dari ${person} (${note})`,
-          amount: amt,
-          type: 'income',
-          category: 'Penerimaan Utang',
-          accountName: targetAcc.name,
-          rawDate: rawDateStr,
-          dateFormatted: dateStr,
-          time: timeStr
-        });
+        if (currentDebtType === 'piutang') {
+          if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk memberi pinjaman!');
+          targetAcc.balance = parseFloat(targetAcc.balance) - amt;
+
+          transactions.unshift({
+            id: Date.now(),
+            desc: `[Piutang] Pinjamkan ke ${person} (${note})`,
+            amount: amt,
+            type: 'expense',
+            category: 'Pinjaman / Piutang',
+            accountName: targetAcc.name,
+            rawDate: rawDateStr,
+            dateFormatted: dateStr,
+            time: timeStr
+          });
+        } else {
+          targetAcc.balance = parseFloat(targetAcc.balance) + amt;
+
+          transactions.unshift({
+            id: Date.now(),
+            desc: `[Utang] Terima pinjaman dari ${person} (${note})`,
+            amount: amt,
+            type: 'income',
+            category: 'Penerimaan Utang',
+            accountName: targetAcc.name,
+            rawDate: rawDateStr,
+            dateFormatted: dateStr,
+            time: timeStr
+          });
+        }
       }
 
       debts.unshift({
@@ -1100,8 +1162,8 @@
         person: person,
         amount: amt,
         type: currentDebtType,
-        walletName: targetAcc.name,
-        walletId: targetAcc.id,
+        walletName: walletName,
+        walletId: wId,
         note: note,
         date: dateStr,
         paid: false
@@ -1112,6 +1174,11 @@
       document.getElementById('debtNote').value = '';
       closeModal('debtModal');
       saveState();
+
+      let notifTxt = currentDebtType === 'piutang' 
+        ? `Piutang baru: ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`
+        : `Utang baru: dari ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`;
+      triggerLocalNotification("Dompet & Ops: Catatan Buku Disimpan", notifTxt);
     }
 
     function openSettleModal(debtId) {
@@ -1183,6 +1250,9 @@
       activeSettleItem.paid = true;
       closeModal('settleModal');
       saveState();
+
+      let notifLunas = `${activeSettleItem.person} lunas ${formatRupiah(amt)} masuk ke ${targetAcc.name}`;
+      triggerLocalNotification("Dompet & Ops: Pelunasan Berhasil", notifLunas);
     }
 
     function openNewAccountModal() {

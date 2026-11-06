@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Dompet & Rekening Tracker</title>
-  <link rel="manifest" href="./manifest.json">
+  <title>DompetKu - Catatan Dompet & Kas</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DompetKu">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -20,7 +24,22 @@
       --card-dark: #0f172a;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  font-family: 'Plus Jakarta Sans', sans-serif; 
+  -webkit-tap-highlight-color: transparent; 
+  -webkit-touch-callout: none; /* Cegah menu pop-up saat tap lama di iOS/Android */
+  user-select: none;          /* Matikan fitur blok teks secara umum */
+  -webkit-user-select: none; 
+}
+
+/* Izinkan ketik/blok HANYA di kolom form input */
+input, select, textarea {
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+}
     body { background: var(--bg); color: var(--text); padding-bottom: 95px; }
 
     /* Top Bar */
@@ -45,7 +64,7 @@
     .side-menu-item:hover, .side-menu-item.active { background: #f1f5f9; color: var(--primary-blue); }
 
     /* Main Container */
-    .view-content { max-width: 480px; margin: auto; padding: 16px; }
+    .view-content { width: 100%; max-width: 520px; margin: auto; padding: 16px; }
 
     /* Tab Views */
     .tab-view { display: none; }
@@ -62,48 +81,24 @@
     .inc-exp-item span { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 2px; }
     .inc-exp-item strong { font-size: 0.95rem; }
 
-    /* Breakdown Pos Saldo di Beranda */
+    /* Breakdown Grouping Bank & Cash di Beranda */
     .wallet-breakdown-card {
       border-top: 1px dashed #334155; padding-top: 12px; margin-top: 8px;
     }
-    .breakdown-title { font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
-    .breakdown-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
+    .breakdown-title { font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px; }
+    .breakdown-group {
+      background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.08);
     }
-    .breakdown-item {
-      background: rgba(255,255,255,0.08);
-      padding: 10px 12px;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
+    .group-header {
+      display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 6px; margin-bottom: 8px;
     }
-    .breakdown-item .b-name {
-      font-size: 0.78rem;
-      color: #cbd5e1;
-      font-weight: 600;
-      white-space: normal;
-      word-break: break-word;
-    }
-    .breakdown-item .b-bal {
-      font-size: 0.82rem;
-      color: #fff;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    @media (min-width: 450px) {
-      .breakdown-grid { grid-template-columns: repeat(2, 1fr); }
-      .breakdown-item { flex-direction: column; align-items: flex-start; }
-    }
-
-    @media (min-width: 900px) {
-      .view-content { max-width: 860px; }
-      .breakdown-grid { grid-template-columns: repeat(3, 1fr); }
-    }
+    .group-title { font-size: 0.82rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
+    .group-total { font-size: 0.9rem; font-weight: 700; color: #fff; }
+    .sub-item-list { display: flex; flex-direction: column; gap: 6px; padding-left: 8px; }
+    .sub-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #cbd5e1; }
+    .sub-item-name { display: flex; align-items: center; gap: 6px; }
+    .sub-item-bal { font-weight: 600; color: #f1f5f9; }
 
     /* Utang Piutang Summary Cards */
     .debt-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
@@ -195,8 +190,6 @@
 
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
-    
-    /* Format input & select yang lebih proporsional di HP */
     .form-group input {
       width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff;
     }
@@ -204,8 +197,10 @@
       width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; outline: none; background: #fff;
       line-height: 1.4; color: #1e293b; font-weight: 500;
     }
-    .form-group select option {
-      font-size: 0.82rem; padding: 6px;
+
+    /* Searchable Selector Box */
+    .search-filter-input {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; margin-bottom: 6px; outline: none;
     }
 
     .btn-submit-action {
@@ -213,7 +208,6 @@
       font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px;
     }
 
-    /* Tombol Hold to Delete */
     .btn-hold-delete {
       width: 100%; padding: 14px; border: none; border-radius: 12px; background: #fee2e2; color: #ef4444;
       font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-top: 12px; position: relative; overflow: hidden;
@@ -221,6 +215,11 @@
     }
     .hold-progress {
       position: absolute; top: 0; left: 0; bottom: 0; width: 0%; background: #ef4444; opacity: 0.3; transition: width 0.1s linear; pointer-events: none;
+    }
+
+    @media (min-width: 900px) {
+      .view-content { max-width: 860px; }
+      .net-val { font-size: 2.2rem; }
     }
   </style>
 </head>
@@ -243,7 +242,7 @@
     <div class="side-profile">
       <div class="avatar">👨‍💻</div>
       <div>
-        <h4 style="font-size: 0.95rem; font-weight: 700;">Keuangan Saya</h4>
+        <h4 style="font-size: 0.95rem; font-weight: 700;" id="sideProfileNameDisplay">Keuangan Saya</h4>
         <small style="color:var(--text-muted);">Personal & Ops Tracker</small>
       </div>
     </div>
@@ -276,9 +275,10 @@
           </div>
         </div>
 
+        <!-- Rincian Berkelompok per Bank / Cash -->
         <div class="wallet-breakdown-card">
-          <div class="breakdown-title">Rincian Pos Saldo Saat Ini:</div>
-          <div class="breakdown-grid" id="homeWalletBreakdown"></div>
+          <div class="breakdown-title">Akumulasi Saldo per Bank & Kas:</div>
+          <div id="homeWalletBreakdown"></div>
         </div>
       </div>
 
@@ -298,7 +298,7 @@
       <div id="homeRecentTx"></div>
     </div>
 
-    <!-- 2. TAB TRANSAKSI (MUTASI ALA M-BANKING) -->
+    <!-- 2. TAB TRANSAKSI -->
     <div class="tab-view" id="view-transaksi">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
         <h2 style="font-size: 1.1rem; font-weight: 700;">Mutasi Rekening</h2>
@@ -324,20 +324,20 @@
       <div id="utangList"></div>
     </div>
 
-    <!-- 4. TAB PROFIL (REKENING & CASH) -->
+    <!-- 4. TAB PROFIL -->
     <div class="tab-view" id="view-profil">
       <div class="asset-header-bar">
         <div>
-          <h2 style="font-size:1.1rem; font-weight:700;">Profil Keuangan</h2>
+          <h2 style="font-size:1.1rem; font-weight:700;">Profil Rekening & Kas</h2>
           <p style="font-size:0.75rem; color:var(--text-muted);">Klik akun untuk Edit atau Hapus</p>
         </div>
-        <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Rekening</button>
+        <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Akun</button>
       </div>
 
       <div class="asset-section-title">Rekening Bank & E-Wallet</div>
       <div id="bankAccountsList"></div>
 
-      <div class="asset-section-title">Uang Tunai / Cash</div>
+      <div class="asset-section-title">Uang Tunai / Cash Fisik</div>
       <div id="cashAccountsList"></div>
     </div>
 
@@ -443,7 +443,7 @@
 
       <div class="form-group">
         <label>Nama / Keterangan</label>
-        <input type="text" id="txDesc" placeholder="Misal: Beli makan siang / bensin ops">
+        <input type="text" id="txDesc" placeholder="Misal: Beli makan siang / operasional">
       </div>
 
       <div class="form-group" id="categoryGroup">
@@ -459,17 +459,17 @@
       </div>
 
       <div class="form-group" id="singleAccountGroup">
-        <label id="assetLabel">Keluarkan Dari Aset:</label>
+        <label id="assetLabel">Keluarkan Dari Pos:</label>
         <select id="txAsset"></select>
       </div>
 
       <div id="transferAccountGroup" style="display:none;">
         <div class="form-group">
-          <label>Dari Sumber Aset</label>
+          <label>Dari Sumber Pos</label>
           <select id="tfSource"></select>
         </div>
         <div class="form-group">
-          <label>Ke Tujuan Aset</label>
+          <label>Ke Tujuan Pos</label>
           <select id="tfTarget"></select>
         </div>
       </div>
@@ -489,7 +489,7 @@
       <input type="hidden" id="editAccId">
 
       <div class="form-group">
-        <label>Nama Akun</label>
+        <label>Nama Pos / Kepemilikan</label>
         <input type="text" id="editAccName">
       </div>
 
@@ -500,7 +500,6 @@
 
       <button class="btn-submit-action" onclick="saveEditedAccount()">Simpan Perubahan</button>
 
-      <!-- Tombol Hold to Delete (Tahan 3 Detik) -->
       <button class="btn-hold-delete" id="btnDeleteHold">
         <span class="hold-progress" id="holdProgress"></span>
         <span id="holdText">Tahan 3 detik untuk Hapus Akun</span>
@@ -521,7 +520,7 @@
       </div>
       <div class="form-group">
         <label>Nama Orang / Pihak</label>
-        <input type="text" id="debtPerson" placeholder="Contoh: Ryan ob jastek, Alif">
+        <input type="text" id="debtPerson" placeholder="Contoh: Ryan, Toko Komponen">
       </div>
       <div class="form-group">
         <label>Nominal (Rp)</label>
@@ -533,7 +532,7 @@
       </div>
       <div class="form-group">
         <label>Keterangan / Keperluan</label>
-        <input type="text" id="debtNote" placeholder="Misal: Talangan makan siang, Cooler hp">
+        <input type="text" id="debtNote" placeholder="Misal: Talangan operasional, beli sparepart">
       </div>
       <button class="btn-submit-action" onclick="saveNewDebt()">Simpan Buku Pinjaman</button>
     </div>
@@ -562,33 +561,78 @@
         <h3 style="font-size: 1rem; font-weight: 700;">Tambah Rekening / Cash</h3>
         <button class="icon-btn" onclick="closeModal('accModal')">✕</button>
       </div>
+
       <div class="form-group">
         <label>Tipe Aset</label>
-        <select id="newAccType">
+        <select id="newAccType" onchange="handleAccountTypeChange()">
           <option value="bank">Rekening Bank / E-Wallet</option>
-          <option value="cash">Uang Tunai / Cash</option>
+          <option value="cash">Uang Tunai / Cash Fisik</option>
         </select>
       </div>
-      <div class="form-group">
-        <label>Nama Akun</label>
-        <input type="text" id="newAccName" placeholder="Contoh: Seabank, Cash Ops">
+
+      <!-- Pilih Bank / Dompet dengan Pencarian -->
+      <div class="form-group" id="bankSelectionGroup">
+        <label>Pilih Bank / E-Wallet Indonesia</label>
+        <input type="text" class="search-filter-input" id="bankSearchInput" placeholder="🔍 Cari bank... (BCA, BNI, BRI, Seabank, Mandiri)" oninput="filterBankOptions()">
+        <select id="newAccBankSelect" size="4"></select>
       </div>
+
+      <!-- Pilih Mata Uang Cash dengan Pencarian -->
+      <div class="form-group" id="currencySelectionGroup" style="display:none;">
+        <label>Pilih Mata Uang Tunai</label>
+        <input type="text" class="search-filter-input" id="currencySearchInput" placeholder="🔍 Cari mata uang... (IDR, MYR, USD, SGD)" oninput="filterCurrencyOptions()">
+        <select id="newAccCurrencySelect" size="4"></select>
+      </div>
+
+      <div class="form-group">
+        <label>Nama Pos / Alokasi Kepemilikan</label>
+        <input type="text" id="newAccOwnerName" placeholder="Misal: Uang Pribadi, Ops Lapangan 6 Nov, Dana Darurat">
+      </div>
+
       <div class="form-group">
         <label>Saldo Awal (Rp)</label>
         <input type="text" id="newAccBalance" placeholder="0" inputmode="numeric" oninput="formatRupiahInput(this)">
       </div>
+
       <button class="btn-submit-action" onclick="saveNewAccount()">Tambahkan Akun</button>
     </div>
   </div>
 
   <script>
+    // Master Data Bank & E-Wallet Lengkap Indonesia
+    const INDONESIA_BANKS = [
+      "Bank BNI", "Bank BCA", "Bank Mandiri", "Bank BRI", "Bank Syariah Indonesia (BSI)",
+      "Bank CIMB Niaga", "Bank Permata", "Bank Danamon", "Bank Tabungan Negara (BTN)",
+      "Bank Panin", "Bank OCBC NISP", "Bank Sinarmas", "Bank Mega", "Bank Bukopin",
+      "SeaBank", "Bank Jago", "Allo Bank", "Blu by BCA", "Neobank (BNC)", "Jenius (BTPN)",
+      "Bank Central Asia Digital", "Bank Jateng", "Bank Jatim", "Bank BJB", "Bank DKI",
+      "Bank Nagari", "Bank Sumut", "Bank BPD DIY", "Bank Kalbar", "Bank Kalsel", "Bank Sulselbar",
+      "GoPay", "OVO", "DANA", "ShopeePay", "LinkAja"
+    ];
+
+    // Master Data Mata Uang Dunia Lengkap
+    const CURRENCIES = [
+      { code: "IDR", name: "Rupiah Indonesia (IDR)" },
+      { code: "MYR", name: "Ringgit Malaysia (MYR)" },
+      { code: "USD", name: "Dollar Amerika Serikat (USD)" },
+      { code: "SGD", name: "Dollar Singapura (SGD)" },
+      { code: "SAR", name: "Riyal Arab Saudi (SAR)" },
+      { code: "JPY", name: "Yen Jepang (JPY)" },
+      { code: "EUR", name: "Euro Uni Eropa (EUR)" },
+      { code: "GBP", name: "Poundsterling Inggris (GBP)" },
+      { code: "AUD", name: "Dollar Australia (AUD)" },
+      { code: "THB", name: "Baht Thailand (THB)" },
+      { code: "CNY", name: "Yuan Tiongkok (CNY)" },
+      { code: "KRW", name: "Won Korea Selatan (KRW)" },
+      { code: "TWD", name: "Dollar Taiwan (TWD)" },
+      { code: "AED", name: "Dirham Uni Emirat Arab (AED)" }
+    ];
+
     // State Awal
     const defaultAccounts = [
-      { id: 'acc_1', name: 'BNI Rekening Utama', type: 'bank', balance: 4386000 },
-      { id: 'acc_2', name: 'Rekening Operasional', type: 'bank', balance: 1500000 },
-      { id: 'acc_3', name: 'Cash Pribadi', type: 'cash', balance: 90000 },
-      { id: 'acc_4', name: 'Cash Ops Lapangan', type: 'cash', balance: 200000 },
-      { id: 'acc_5', name: 'OPS NOJORONO 6 NOV', type: 'cash', balance: 100000 }
+      { id: 'acc_1', bankGroup: 'Bank BNI', name: 'Rekening Utama (Pribadi)', type: 'bank', currency: 'IDR', balance: 4362886 },
+      { id: 'acc_2', bankGroup: 'Bank BNI', name: 'Sangu Ops 5 Nov', type: 'bank', currency: 'IDR', balance: 108200 },
+      { id: 'acc_3', bankGroup: 'Cash Fisik (IDR)', name: 'Dompet gueh', type: 'cash', currency: 'IDR', balance: 79500 }
     ];
 
     let accounts = JSON.parse(localStorage.getItem('meld_accounts')) || defaultAccounts;
@@ -599,12 +643,10 @@
     let currentDebtType = 'piutang';
     let activeSettleItem = null;
 
-    /* Hold to delete tracking */
     let holdTimer = null;
     let holdStartTime = 0;
     const HOLD_DURATION = 3000;
 
-    /* Utility Format Angka & Input Ribuan */
     function formatRupiah(num) {
       return "Rp" + Math.round(Number(num) || 0).toLocaleString("id-ID");
     }
@@ -612,7 +654,9 @@
     function loadProfileName() {
       const savedName = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
       const el = document.getElementById('profileNameDisplay');
+      const sideEl = document.getElementById('sideProfileNameDisplay');
       if (el) el.innerText = savedName;
+      if (sideEl) sideEl.innerText = savedName;
     }
 
     function changeProfileName() {
@@ -667,7 +711,6 @@
       renderAll();
     }
 
-    /* Tab Switching & Sidebar */
     function switchTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
@@ -694,7 +737,7 @@
       document.getElementById('actionMenuModal').classList.add('open');
     }
 
-    /* Render Logic Utama */
+    // Render Utama: Melakukan Grouping Total Saldo per Bank di Beranda
     function renderAll() {
       let totalNet = 0;
       let totalInc = 0;
@@ -711,30 +754,64 @@
       document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
       document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
 
-      const breakdownBox = document.getElementById('homeWalletBreakdown');
-      breakdownBox.innerHTML = '';
+      // 1. Grouping Pos Saldo berdasarkan Bank/Dompet Induk
+      const groupedData = {};
       accounts.forEach(acc => {
-        breakdownBox.innerHTML += `
-          <div class="breakdown-item">
-            <span class="b-name">${acc.type === 'bank' ? '💳' : '💵'} ${acc.name}</span>
-            <span class="b-bal">${formatRupiah(acc.balance)}</span>
-          </div>
-        `;
+        const groupKey = acc.bankGroup || (acc.type === 'bank' ? 'Bank Lain' : 'Uang Tunai (Cash)');
+        if (!groupedData[groupKey]) {
+          groupedData[groupKey] = {
+            total: 0,
+            type: acc.type,
+            items: []
+          };
+        }
+        groupedData[groupKey].total += parseFloat(acc.balance);
+        groupedData[groupKey].items.push(acc);
       });
 
+      const breakdownBox = document.getElementById('homeWalletBreakdown');
+      breakdownBox.innerHTML = '';
+
+      for (let bankName in groupedData) {
+        const g = groupedData[bankName];
+        let subItemsHtml = '';
+        g.items.forEach(item => {
+          subItemsHtml += `
+            <div class="sub-item">
+              <span class="sub-item-name">• ${item.name}</span>
+              <span class="sub-item-bal">${formatRupiah(item.balance)}</span>
+            </div>
+          `;
+        });
+
+        breakdownBox.innerHTML += `
+          <div class="breakdown-group">
+            <div class="group-header">
+              <span class="group-title">${g.type === 'bank' ? '🏦' : '💵'} ${bankName}</span>
+              <span class="group-total">${formatRupiah(g.total)}</span>
+            </div>
+            <div class="sub-item-list">
+              ${subItemsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Render Tab Profil (Rekening Bank & Cash)
       const bankCont = document.getElementById('bankAccountsList');
       const cashCont = document.getElementById('cashAccountsList');
       bankCont.innerHTML = '';
       cashCont.innerHTML = '';
 
       accounts.forEach(acc => {
+        const groupLabel = acc.bankGroup || (acc.type === 'bank' ? 'Bank' : 'Cash');
         const itemHtml = `
           <div class="account-card" onclick="openEditAccountModal('${acc.id}')">
             <div class="acc-left">
-              <div class="acc-icon">${acc.type === 'bank' ? '💳' : '💵'}</div>
+              <div class="acc-icon">${acc.type === 'bank' ? '🏦' : '💵'}</div>
               <div class="acc-info">
-                <h4>${acc.name}</h4>
-                <p>${acc.type === 'bank' ? 'Bank / Digital' : 'Tunai / Cash'} • <span style="color:var(--primary-blue)">Edit</span></p>
+                <h4>${groupLabel} - ${acc.name}</h4>
+                <p>${acc.type === 'bank' ? 'Bank / Digital' : 'Tunai / Cash (' + (acc.currency || 'IDR') + ')'} • <span style="color:var(--primary-blue)">Edit</span></p>
               </div>
             </div>
             <div class="acc-bal">${formatRupiah(acc.balance)}</div>
@@ -891,13 +968,13 @@
         document.getElementById('categoryGroup').style.display = 'block';
         document.getElementById('singleAccountGroup').style.display = 'block';
         document.getElementById('transferAccountGroup').style.display = 'none';
-        document.getElementById('assetLabel').innerText = 'Keluarkan Dari Aset:';
+        document.getElementById('assetLabel').innerText = 'Keluarkan Dari Pos:';
       } else if (type === 'income') {
         document.getElementById('typeInc').classList.add('active');
         document.getElementById('categoryGroup').style.display = 'block';
         document.getElementById('singleAccountGroup').style.display = 'block';
         document.getElementById('transferAccountGroup').style.display = 'none';
-        document.getElementById('assetLabel').innerText = 'Masukkan Ke Aset:';
+        document.getElementById('assetLabel').innerText = 'Masukkan Ke Pos:';
       } else if (type === 'transfer') {
         document.getElementById('typeTf').classList.add('active');
         document.getElementById('categoryGroup').style.display = 'none';
@@ -917,12 +994,12 @@
       tfTar.innerHTML = '';
       dWallet.innerHTML = '';
 
-      // Opsi khusus untuk penyesuaian saldo pada buku utang piutang
       let adjustOpt = `<option value="none">⚡ [Tanpa Potong/Tambah Saldo] Catat Buku Saja</option>`;
       dWallet.innerHTML += adjustOpt;
 
       accounts.forEach(a => {
-        let opt = `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
+        const fullLabel = `${a.bankGroup || (a.type === 'bank' ? 'Bank' : 'Cash')} - ${a.name} (${formatRupiah(a.balance)})`;
+        let opt = `<option value="${a.id}">${fullLabel}</option>`;
         assetSel.innerHTML += opt;
         tfSrc.innerHTML += opt;
         tfTar.innerHTML += opt;
@@ -981,7 +1058,7 @@
           targetAcc.balance = parseFloat(targetAcc.balance) + amt;
         }
 
-        sourceName = targetAcc.name;
+        sourceName = `${targetAcc.bankGroup ? targetAcc.bankGroup + ' - ' : ''}${targetAcc.name}`;
 
         transactions.unshift({
           id: Date.now(),
@@ -1000,7 +1077,6 @@
       document.getElementById('txDesc').value = '';
       closeModal('txModal');
 
-      // Notifikasi lengkap dengan nama rekening/cash
       let notifMsg = `${desc}: ${formatRupiah(amt)} via ${sourceName}`;
       triggerLocalNotification("DompetKu: Transaksi Berhasil", notifMsg);
 
@@ -1119,11 +1195,10 @@
 
       let walletName = 'Penyesuaian Saldo (Buku Saja)';
 
-      // Jika user memilih memotong rekening sungguhan (bukan penyesuaian)
       if (wId !== 'none') {
         const targetAcc = accounts.find(a => a.id === wId);
         if (!targetAcc) return alert('Pilih akun valid!');
-        walletName = targetAcc.name;
+        walletName = `${targetAcc.bankGroup ? targetAcc.bankGroup + ' - ' : ''}${targetAcc.name}`;
 
         if (currentDebtType === 'piutang') {
           if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk memberi pinjaman!');
@@ -1135,7 +1210,7 @@
             amount: amt,
             type: 'expense',
             category: 'Pinjaman / Piutang',
-            accountName: targetAcc.name,
+            accountName: walletName,
             rawDate: rawDateStr,
             dateFormatted: dateStr,
             time: timeStr
@@ -1149,7 +1224,7 @@
             amount: amt,
             type: 'income',
             category: 'Penerimaan Utang',
-            accountName: targetAcc.name,
+            accountName: walletName,
             rawDate: rawDateStr,
             dateFormatted: dateStr,
             time: timeStr
@@ -1176,9 +1251,9 @@
       saveState();
 
       let notifTxt = currentDebtType === 'piutang' 
-        ? `Piutang baru: ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`
-        : `Utang baru: dari ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`;
-      triggerLocalNotification("DompetKu: Catatan Buku Disimpan", notifTxt);
+        ? `Piutang: ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`
+        : `Utang: dari ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`;
+      triggerLocalNotification("DompetKu: Catatan Pinjaman", notifTxt);
     }
 
     function openSettleModal(debtId) {
@@ -1188,7 +1263,8 @@
       const sel = document.getElementById('settleWallet');
       sel.innerHTML = '';
       accounts.forEach(a => {
-        sel.innerHTML += `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
+        const fullLabel = `${a.bankGroup || (a.type === 'bank' ? 'Bank' : 'Cash')} - ${a.name} (${formatRupiah(a.balance)})`;
+        sel.innerHTML += `<option value="${a.id}">${fullLabel}</option>`;
       });
 
       if (activeSettleItem.type === 'piutang') {
@@ -1215,6 +1291,7 @@
       const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
       const rawDateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      const accFullName = `${targetAcc.bankGroup ? targetAcc.bankGroup + ' - ' : ''}${targetAcc.name}`;
 
       if (activeSettleItem.type === 'piutang') {
         targetAcc.balance = parseFloat(targetAcc.balance) + amt;
@@ -1225,7 +1302,7 @@
           amount: amt,
           type: 'income',
           category: 'Pelunasan Piutang',
-          accountName: targetAcc.name,
+          accountName: accFullName,
           rawDate: rawDateStr,
           dateFormatted: dateStr,
           time: timeStr
@@ -1240,7 +1317,7 @@
           amount: amt,
           type: 'expense',
           category: 'Bayar Utang',
-          accountName: targetAcc.name,
+          accountName: accFullName,
           rawDate: rawDateStr,
           dateFormatted: dateStr,
           time: timeStr
@@ -1251,29 +1328,93 @@
       closeModal('settleModal');
       saveState();
 
-      let notifLunas = `${activeSettleItem.person} lunas ${formatRupiah(amt)} masuk ke ${targetAcc.name}`;
+      let notifLunas = `${activeSettleItem.person} lunas ${formatRupiah(amt)} masuk ke ${accFullName}`;
       triggerLocalNotification("DompetKu: Pelunasan Berhasil", notifLunas);
     }
 
+    // Modal Tambah Akun Baru dengan Pilihan Bank & Mata Uang Dinamis
     function openNewAccountModal() {
+      populateBankSelect();
+      populateCurrencySelect();
+      handleAccountTypeChange();
       document.getElementById('accModal').classList.add('open');
     }
 
-    function saveNewAccount() {
-      const name = document.getElementById('newAccName').value.trim();
+    function handleAccountTypeChange() {
       const type = document.getElementById('newAccType').value;
+      if (type === 'bank') {
+        document.getElementById('bankSelectionGroup').style.display = 'block';
+        document.getElementById('currencySelectionGroup').style.display = 'none';
+      } else {
+        document.getElementById('bankSelectionGroup').style.display = 'none';
+        document.getElementById('currencySelectionGroup').style.display = 'block';
+      }
+    }
+
+    function populateBankSelect(filterText = '') {
+      const sel = document.getElementById('newAccBankSelect');
+      sel.innerHTML = '';
+      const filtered = INDONESIA_BANKS.filter(b => b.toLowerCase().includes(filterText.toLowerCase()));
+      filtered.forEach((b, idx) => {
+        let opt = document.createElement('option');
+        opt.value = b;
+        opt.innerText = b;
+        if (idx === 0) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function filterBankOptions() {
+      const q = document.getElementById('bankSearchInput').value;
+      populateBankSelect(q);
+    }
+
+    function populateCurrencySelect(filterText = '') {
+      const sel = document.getElementById('newAccCurrencySelect');
+      sel.innerHTML = '';
+      const filtered = CURRENCIES.filter(c => c.name.toLowerCase().includes(filterText.toLowerCase()) || c.code.toLowerCase().includes(filterText.toLowerCase()));
+      filtered.forEach((c, idx) => {
+        let opt = document.createElement('option');
+        opt.value = c.code;
+        opt.innerText = c.name;
+        if (idx === 0) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    }
+
+    function filterCurrencyOptions() {
+      const q = document.getElementById('currencySearchInput').value;
+      populateCurrencySelect(q);
+    }
+
+    function saveNewAccount() {
+      const type = document.getElementById('newAccType').value;
+      const ownerName = document.getElementById('newAccOwnerName').value.trim();
       const bal = parseFormattedNumber(document.getElementById('newAccBalance').value);
 
-      if (!name) return alert('Nama akun wajib diisi!');
+      if (!ownerName) return alert('Nama pos/alokasi uang wajib diisi! (Misal: Uang Pribadi / Ops 6 Nov)');
+
+      let bankGroup = '';
+      let currencyCode = 'IDR';
+
+      if (type === 'bank') {
+        bankGroup = document.getElementById('newAccBankSelect').value || 'Bank Lain';
+        currencyCode = 'IDR';
+      } else {
+        currencyCode = document.getElementById('newAccCurrencySelect').value || 'IDR';
+        bankGroup = `Cash Fisik (${currencyCode})`;
+      }
 
       accounts.push({
         id: 'acc_' + Date.now(),
-        name: name,
+        bankGroup: bankGroup,
+        name: ownerName,
         type: type,
+        currency: currencyCode,
         balance: bal
       });
 
-      document.getElementById('newAccName').value = '';
+      document.getElementById('newAccOwnerName').value = '';
       document.getElementById('newAccBalance').value = '';
       closeModal('accModal');
       saveState();
@@ -1292,7 +1433,7 @@
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ accounts, transactions, debts }, null, 2));
       const dl = document.createElement('a');
       dl.setAttribute("href", dataStr);
-      dl.setAttribute("download", `dompet_backup_${Date.now()}.json`);
+      dl.setAttribute("download", `dompetku_backup_${Date.now()}.json`);
       dl.click();
     }
 

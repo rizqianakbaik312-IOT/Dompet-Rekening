@@ -189,7 +189,9 @@
   <div class="top-navbar">
     <div class="nav-left">
       <button class="icon-btn" onclick="toggleSidebar()">☰</button>
-      <div class="profile-pill">🏢 Keuangan Rizqi</div>
+      <div class="profile-pill" onclick="changeProfileName()" style="cursor:pointer;" title="Klik untuk ubah nama">
+  🏢 <span id="profileNameDisplay">Keuangan Saya</span>
+</div>
     </div>
     <div style="font-size: 1.1rem;">🔔</div>
   </div>
@@ -566,6 +568,21 @@
     function formatRupiah(num) {
       return "Rp" + Math.round(Number(num) || 0).toLocaleString("id-ID");
     }
+
+    function loadProfileName() {
+  const savedName = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
+  const el = document.getElementById('profileNameDisplay');
+  if (el) el.innerText = savedName;
+}
+
+function changeProfileName() {
+  const current = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
+  const newName = prompt('Masukkan nama profil keuangan Anda:', current);
+  if (newName && newName.trim() !== '') {
+    localStorage.setItem('meld_profile_name', newName.trim());
+    loadProfileName();
+  }
+}
 
     // Meminta izin notifikasi saat web dibuka
 function requestNotificationPermission() {
@@ -1225,10 +1242,11 @@ function triggerLocalNotification(title, message) {
 
     
     requestNotificationPermission();
+    loadProfileName();
     renderAll();
     if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js');
-}
+      navigator.serviceWorker.register('./sw.js');
+    }
   </script>
 </body>
 </html>

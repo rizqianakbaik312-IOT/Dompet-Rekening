@@ -567,6 +567,33 @@
       return "Rp" + Math.round(Number(num) || 0).toLocaleString("id-ID");
     }
 
+    // Meminta izin notifikasi saat web dibuka
+function requestNotificationPermission() {
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+  }
+}
+
+// Fungsi mengirim notifikasi ke sistem HP
+function triggerLocalNotification(title, message) {
+  if ("Notification" in window && Notification.permission === "granted") {
+    navigator.serviceWorker.ready.then(registration => {
+      registration.showNotification(title, {
+        body: message,
+        icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
+        badge: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
+        vibrate: [200, 100, 200]
+      });
+    }).catch(() => {
+      // Fallback jika tanpa service worker
+      new Notification(title, {
+        body: message,
+        icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png'
+      });
+    });
+  }
+}
+
     function formatRupiahInput(input) {
       let val = input.value.replace(/\D/g, '');
       if (!val) { input.value = ''; return; }
@@ -913,6 +940,8 @@
       document.getElementById('txAmount').value = '';
       document.getElementById('txDesc').value = '';
       closeModal('txModal');
+      let notifMsg = `${desc}: ${formatRupiah(amt)}`;
+      triggerLocalNotification("Dompet & Ops: Transaksi Berhasil", notifMsg);
       saveState();
     }
 
@@ -1194,6 +1223,8 @@
       dl.click();
     }
 
+    
+    requestNotificationPermission();
     renderAll();
   </script>
 </body>

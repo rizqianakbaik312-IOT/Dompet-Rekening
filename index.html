@@ -58,9 +58,21 @@
     }
     .net-title { font-size: 0.75rem; letter-spacing: 1px; color: #94a3b8; font-weight: 600; }
     .net-val { font-size: 1.8rem; font-weight: 700; margin: 8px 0 16px 0; }
-    .inc-exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #334155; padding-top: 14px; }
+    .inc-exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #334155; padding-top: 14px; margin-bottom: 14px; }
     .inc-exp-item span { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 2px; }
     .inc-exp-item strong { font-size: 0.95rem; }
+
+    /* Breakdown Dana di Beranda */
+    .wallet-breakdown-card {
+      border-top: 1px dashed #334155; padding-top: 12px; margin-top: 8px;
+    }
+    .breakdown-title { font-size: 0.7rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px; }
+    .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .breakdown-item {
+      background: rgba(255,255,255,0.06); padding: 8px 10px; border-radius: 10px; display: flex; flex-direction: column;
+    }
+    .breakdown-item .b-name { font-size: 0.75rem; color: #cbd5e1; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .breakdown-item .b-bal { font-size: 0.85rem; color: #fff; font-weight: 700; margin-top: 2px; }
 
     /* Utang Piutang Summary Cards */
     .debt-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
@@ -75,8 +87,9 @@
     
     .account-card {
       background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.15s ease;
     }
+    .account-card:active { transform: scale(0.98); background: #f8fafc; }
     .acc-left { display: flex; align-items: center; gap: 12px; }
     .acc-icon { width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
     .acc-info h4 { font-size: 0.9rem; font-weight: 600; }
@@ -158,6 +171,16 @@
       width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary-blue); color: #fff;
       font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 8px;
     }
+
+    /* Tombol Hold to Delete */
+    .btn-hold-delete {
+      width: 100%; padding: 14px; border: none; border-radius: 12px; background: #fee2e2; color: #ef4444;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-top: 12px; position: relative; overflow: hidden;
+      user-select: none; -webkit-user-select: none;
+    }
+    .hold-progress {
+      position: absolute; top: 0; left: 0; bottom: 0; width: 0%; background: #ef4444; opacity: 0.3; transition: width 0.1s linear; pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -198,6 +221,7 @@
       <div class="net-worth-box">
         <div class="net-title">TOTAL UANG SAYA (NET WORTH)</div>
         <div class="net-val" id="netWorthDisplay">Rp 0</div>
+        
         <div class="inc-exp-grid">
           <div class="inc-exp-item">
             <span>Pemasukan</span>
@@ -207,6 +231,12 @@
             <span>Pengeluaran</span>
             <strong style="color:var(--expense-red)" id="homeExpenseDisplay">-Rp 0</strong>
           </div>
+        </div>
+
+        <!-- Rincian Dana Semua Dompet & Cash Langsung di Box Hitam -->
+        <div class="wallet-breakdown-card">
+          <div class="breakdown-title">Rincian Pos Saldo Saat Ini:</div>
+          <div class="breakdown-grid" id="homeWalletBreakdown"></div>
         </div>
       </div>
 
@@ -257,7 +287,7 @@
       <div class="asset-header-bar">
         <div>
           <h2 style="font-size:1.1rem; font-weight:700;">Profil Keuangan</h2>
-          <p style="font-size:0.75rem; color:var(--text-muted);">Kelola Rekening Bank & Cash</p>
+          <p style="font-size:0.75rem; color:var(--text-muted);">Klik akun untuk Edit atau Hapus</p>
         </div>
         <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Rekening</button>
       </div>
@@ -406,6 +436,36 @@
     </div>
   </div>
 
+  <!-- Modal Edit / Hapus Akun -->
+  <div class="modal-overlay" id="editAccModal" onclick="closeModalOnOut(event, 'editAccModal')">
+    <div class="modal-sheet">
+      <div class="sheet-head">
+        <h3 style="font-size: 1rem; font-weight: 700;">Edit Akun Rekening / Cash</h3>
+        <button class="icon-btn" onclick="closeModal('editAccModal')">✕</button>
+      </div>
+
+      <input type="hidden" id="editAccId">
+
+      <div class="form-group">
+        <label>Nama Akun</label>
+        <input type="text" id="editAccName">
+      </div>
+
+      <div class="form-group">
+        <label>Saldo Terkini (Rp)</label>
+        <input type="text" id="editAccBalance" inputmode="numeric" oninput="formatRupiahInput(this)">
+      </div>
+
+      <button class="btn-submit-action" onclick="saveEditedAccount()">Simpan Perubahan</button>
+
+      <!-- Tombol Hold to Delete (Tahan 3 Detik) -->
+      <button class="btn-hold-delete" id="btnDeleteHold">
+        <span class="hold-progress" id="holdProgress"></span>
+        <span id="holdText">Tahan 3 detik untuk Hapus Akun</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Modal Tambah Utang / Piutang -->
   <div class="modal-overlay" id="debtModal" onclick="closeModalOnOut(event, 'debtModal')">
     <div class="modal-sheet">
@@ -482,10 +542,11 @@
   <script>
     // State Awal
     const defaultAccounts = [
-      { id: 'acc_1', name: 'BNI Rekening Utama', type: 'bank', balance: 4521000 },
+      { id: 'acc_1', name: 'BNI Rekening Utama', type: 'bank', balance: 4386000 },
       { id: 'acc_2', name: 'Rekening Operasional', type: 'bank', balance: 1500000 },
-      { id: 'acc_3', name: 'Cash Pribadi', type: 'cash', balance: 80000 },
-      { id: 'acc_4', name: 'Cash Nojorono', type: 'cash', balance: 200000 }
+      { id: 'acc_3', name: 'Cash Pribadi', type: 'cash', balance: 90000 },
+      { id: 'acc_4', name: 'Cash Ops Lapangan', type: 'cash', balance: 200000 },
+      { id: 'acc_5', name: 'OPS NOJORONO 6 NOV', type: 'cash', balance: 100000 }
     ];
 
     let accounts = JSON.parse(localStorage.getItem('meld_accounts')) || defaultAccounts;
@@ -495,6 +556,11 @@
     let currentTxType = 'expense';
     let currentDebtType = 'piutang';
     let activeSettleItem = null;
+
+    /* Hold to delete tracking */
+    let holdTimer = null;
+    let holdStartTime = 0;
+    const HOLD_DURATION = 3000; // 3 Detik
 
     /* Utility Format Angka & Input Ribuan */
     function formatRupiah(num) {
@@ -546,7 +612,7 @@
       document.getElementById('actionMenuModal').classList.add('open');
     }
 
-    /* Render Logic */
+    /* Render Logic Utama */
     function renderAll() {
       let totalNet = 0;
       let totalInc = 0;
@@ -563,7 +629,19 @@
       document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
       document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
 
-      // 1. Render Kartu Dompet di Tab Profil
+      // 1. Render Breakdown Saldo di Kotak Hitam Beranda
+      const breakdownBox = document.getElementById('homeWalletBreakdown');
+      breakdownBox.innerHTML = '';
+      accounts.forEach(acc => {
+        breakdownBox.innerHTML += `
+          <div class="breakdown-item">
+            <span class="b-name">${acc.type === 'bank' ? '💳' : '💵'} ${acc.name}</span>
+            <span class="b-bal">${formatRupiah(acc.balance)}</span>
+          </div>
+        `;
+      });
+
+      // 2. Render Kartu Dompet di Tab Profil (Bisa Diklik untuk Edit/Hapus)
       const bankCont = document.getElementById('bankAccountsList');
       const cashCont = document.getElementById('cashAccountsList');
       bankCont.innerHTML = '';
@@ -571,12 +649,12 @@
 
       accounts.forEach(acc => {
         const itemHtml = `
-          <div class="account-card">
+          <div class="account-card" onclick="openEditAccountModal('${acc.id}')">
             <div class="acc-left">
               <div class="acc-icon">${acc.type === 'bank' ? '💳' : '💵'}</div>
               <div class="acc-info">
                 <h4>${acc.name}</h4>
-                <p>${acc.type === 'bank' ? 'Bank / Digital' : 'Tunai / Cash'}</p>
+                <p>${acc.type === 'bank' ? 'Bank / Digital' : 'Tunai / Cash'} • <span style="color:var(--primary-blue)">Edit</span></p>
               </div>
             </div>
             <div class="acc-bal">${formatRupiah(acc.balance)}</div>
@@ -586,14 +664,12 @@
         else cashCont.innerHTML += itemHtml;
       });
 
-      // 2. Render Mutasi Style M-Banking (Group By Tanggal)
+      // 3. Render Mutasi Style M-Banking & Utang Piutang
       renderMBankingFeed();
-
-      // 3. Render Utang Piutang
       renderDebtFeed();
     }
 
-    /* Tampilan Mutasi Ala M-Banking */
+    /* Mutasi Ala M-Banking (Group By Tanggal) */
     function renderMBankingFeed() {
       const feed = document.getElementById('mBankingTxFeed');
       const homeTx = document.getElementById('homeRecentTx');
@@ -606,7 +682,6 @@
         return;
       }
 
-      // Render 5 terkini di Beranda
       transactions.slice(0, 5).forEach(tx => {
         let cls = tx.type === 'income' ? 'tx-inc' : (tx.type === 'expense' ? 'tx-exp' : 'tx-tf');
         let sign = tx.type === 'income' ? '+' : (tx.type === 'expense' ? '-' : '');
@@ -624,7 +699,6 @@
         `;
       });
 
-      // Grouping per Tanggal di Tab Mutasi
       const groups = {};
       transactions.forEach(t => {
         const d = t.rawDate || 'Hari Ini';
@@ -728,7 +802,6 @@
       setTxType(type);
       populateAccountOptions();
 
-      // Set default tanggal hari ini
       const now = new Date();
       document.getElementById('txDate').value = now.toISOString().split('T')[0];
       document.getElementById('txModal').classList.add('open');
@@ -843,6 +916,85 @@
       saveState();
     }
 
+    /* Modal Edit & Hapus Akun (Hold to Delete 3 Detik) */
+    function openEditAccountModal(accId) {
+      const acc = accounts.find(a => a.id === accId);
+      if (!acc) return;
+
+      document.getElementById('editAccId').value = acc.id;
+      document.getElementById('editAccName').value = acc.name;
+      document.getElementById('editAccBalance').value = Number(acc.balance).toLocaleString('id-ID');
+
+      resetHoldButton();
+      document.getElementById('editAccModal').classList.add('open');
+    }
+
+    function saveEditedAccount() {
+      const accId = document.getElementById('editAccId').value;
+      const newName = document.getElementById('editAccName').value.trim();
+      const newBal = parseFormattedNumber(document.getElementById('editAccBalance').value);
+
+      if (!newName) return alert('Nama akun tidak boleh kosong!');
+
+      let acc = accounts.find(a => a.id === accId);
+      if (acc) {
+        acc.name = newName;
+        acc.balance = newBal;
+      }
+
+      closeModal('editAccModal');
+      saveState();
+    }
+
+    function resetHoldButton() {
+      clearInterval(holdTimer);
+      holdTimer = null;
+      document.getElementById('holdProgress').style.width = '0%';
+      document.getElementById('holdText').innerText = 'Tahan 3 detik untuk Hapus Akun';
+    }
+
+    // Pasang Event Listener Hold to Delete (Mouse & Touchscreen)
+    const btnHold = document.getElementById('btnDeleteHold');
+
+    function startHold(e) {
+      e.preventDefault();
+      holdStartTime = Date.now();
+      const progress = document.getElementById('holdProgress');
+      const text = document.getElementById('holdText');
+
+      holdTimer = setInterval(() => {
+        let elapsed = Date.now() - holdStartTime;
+        let percent = Math.min((elapsed / HOLD_DURATION) * 100, 100);
+        progress.style.width = percent + '%';
+        let remainingSec = Math.ceil((HOLD_DURATION - elapsed) / 1000);
+        text.innerText = `Menghapus dalam ${remainingSec} detik...`;
+
+        if (elapsed >= HOLD_DURATION) {
+          clearInterval(holdTimer);
+          executeDeleteAccount();
+        }
+      }, 50);
+    }
+
+    function cancelHold() {
+      if (holdTimer) resetHoldButton();
+    }
+
+    function executeDeleteAccount() {
+      const accId = document.getElementById('editAccId').value;
+      accounts = accounts.filter(a => a.id !== accId);
+      closeModal('editAccModal');
+      saveState();
+      alert('Akun berhasil dihapus permanen!');
+    }
+
+    btnHold.addEventListener('mousedown', startHold);
+    btnHold.addEventListener('mouseup', cancelHold);
+    btnHold.addEventListener('mouseleave', cancelHold);
+    btnHold.addEventListener('touchstart', startHold, { passive: false });
+    btnHold.addEventListener('touchend', cancelHold);
+    btnHold.addEventListener('touchcancel', cancelHold);
+
     /* Utang & Piutang Logic */
     function openNewDebtModal() {
       populateAccountOptions();
@@ -878,7 +1030,6 @@
       const rawDateStr = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-      // Jika piutang (kita pinjamkan uang), saldo kita berkurang & tercatat di mutasi pengeluaran
       if (currentDebtType === 'piutang') {
         if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk memberi pinjaman!');
         targetAcc.balance = parseFloat(targetAcc.balance) - amt;
@@ -895,7 +1046,6 @@
           time: timeStr
         });
       } else {
-        // Jika kita yang utang, saldo kita bertambah karena nerima pinjaman
         targetAcc.balance = parseFloat(targetAcc.balance) + amt;
 
         transactions.unshift({
@@ -967,7 +1117,6 @@
       const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
       if (activeSettleItem.type === 'piutang') {
-        // Piutang dibayar: uang masuk ke dompet yang dipilih
         targetAcc.balance = parseFloat(targetAcc.balance) + amt;
 
         transactions.unshift({
@@ -982,7 +1131,6 @@
           time: timeStr
         });
       } else {
-        // Utang dibayar: uang keluar dari dompet yang dipilih
         if (targetAcc.balance < amt) return alert('Saldo di ' + targetAcc.name + ' tidak cukup untuk membayar utang!');
         targetAcc.balance = parseFloat(targetAcc.balance) - amt;
 
@@ -1002,10 +1150,9 @@
       activeSettleItem.paid = true;
       closeModal('settleModal');
       saveState();
-      alert('Transaksi pelunasan berhasil dicatat!');
     }
 
-    /* Modal Tambah Rekening/Dompet Baru */
+    /* Modal Tambah Akun Baru */
     function openNewAccountModal() {
       document.getElementById('accModal').classList.add('open');
     }
@@ -1032,6 +1179,7 @@
 
     function closeModal(id) {
       document.getElementById(id).classList.remove('open');
+      if (id === 'editAccModal') resetHoldButton();
     }
 
     function closeModalOnOut(e, id) {

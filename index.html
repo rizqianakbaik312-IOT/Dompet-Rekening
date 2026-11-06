@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Smart Dompet & Ops Tracker</title>
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -190,8 +190,8 @@
     <div class="nav-left">
       <button class="icon-btn" onclick="toggleSidebar()">☰</button>
       <div class="profile-pill" onclick="changeProfileName()" style="cursor:pointer;" title="Klik untuk ubah nama">
-  🏢 <span id="profileNameDisplay">Keuangan Saya</span>
-</div>
+        🏢 <span id="profileNameDisplay">Keuangan Saya</span>
+      </div>
     </div>
     <div style="font-size: 1.1rem;">🔔</div>
   </div>
@@ -202,7 +202,7 @@
     <div class="side-profile">
       <div class="avatar">👨‍💻</div>
       <div>
-        <h4 style="font-size: 0.95rem; font-weight: 700;">Keuangan Rizqi</h4>
+        <h4 style="font-size: 0.95rem; font-weight: 700;">Keuangan Saya</h4>
         <small style="color:var(--text-muted);">Personal & Ops Tracker</small>
       </div>
     </div>
@@ -235,7 +235,6 @@
           </div>
         </div>
 
-        <!-- Rincian Dana Semua Dompet & Cash Langsung di Box Hitam -->
         <div class="wallet-breakdown-card">
           <div class="breakdown-title">Rincian Pos Saldo Saat Ini:</div>
           <div class="breakdown-grid" id="homeWalletBreakdown"></div>
@@ -562,7 +561,7 @@
     /* Hold to delete tracking */
     let holdTimer = null;
     let holdStartTime = 0;
-    const HOLD_DURATION = 3000; // 3 Detik
+    const HOLD_DURATION = 3000;
 
     /* Utility Format Angka & Input Ribuan */
     function formatRupiah(num) {
@@ -570,46 +569,44 @@
     }
 
     function loadProfileName() {
-  const savedName = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
-  const el = document.getElementById('profileNameDisplay');
-  if (el) el.innerText = savedName;
-}
+      const savedName = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
+      const el = document.getElementById('profileNameDisplay');
+      if (el) el.innerText = savedName;
+    }
 
-function changeProfileName() {
-  const current = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
-  const newName = prompt('Masukkan nama profil keuangan Anda:', current);
-  if (newName && newName.trim() !== '') {
-    localStorage.setItem('meld_profile_name', newName.trim());
-    loadProfileName();
-  }
-}
+    function changeProfileName() {
+      const current = localStorage.getItem('meld_profile_name') || 'Keuangan Saya';
+      const newName = prompt('Masukkan nama profil keuangan Anda:', current);
+      if (newName && newName.trim() !== '') {
+        localStorage.setItem('meld_profile_name', newName.trim());
+        loadProfileName();
+      }
+    }
 
-    // Meminta izin notifikasi saat web dibuka
-function requestNotificationPermission() {
-  if ("Notification" in window && Notification.permission !== "granted") {
-    Notification.requestPermission();
-  }
-}
+    function requestNotificationPermission() {
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    }
 
-// Fungsi mengirim notifikasi ke sistem HP
-function triggerLocalNotification(title, message) {
-  if ("Notification" in window && Notification.permission === "granted") {
-    navigator.serviceWorker.ready.then(registration => {
-      registration.showNotification(title, {
-        body: message,
-        icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
-        badge: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
-        vibrate: [200, 100, 200]
-      });
-    }).catch(() => {
-      // Fallback jika tanpa service worker
-      new Notification(title, {
-        body: message,
-        icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png'
-      });
-    });
-  }
-}
+    function triggerLocalNotification(title, message) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification(title, {
+              body: message,
+              icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
+              badge: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png',
+              vibrate: [200, 100, 200]
+            });
+          }).catch(() => {
+            new Notification(title, { body: message, icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png' });
+          });
+        } else {
+          new Notification(title, { body: message, icon: 'https://cdn-icons-png.flaticon.com/512/2454/2454269.png' });
+        }
+      }
+    }
 
     function formatRupiahInput(input) {
       let val = input.value.replace(/\D/g, '');
@@ -673,7 +670,6 @@ function triggerLocalNotification(title, message) {
       document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
       document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
 
-      // 1. Render Breakdown Saldo di Kotak Hitam Beranda
       const breakdownBox = document.getElementById('homeWalletBreakdown');
       breakdownBox.innerHTML = '';
       accounts.forEach(acc => {
@@ -685,7 +681,6 @@ function triggerLocalNotification(title, message) {
         `;
       });
 
-      // 2. Render Kartu Dompet di Tab Profil (Bisa Diklik untuk Edit/Hapus)
       const bankCont = document.getElementById('bankAccountsList');
       const cashCont = document.getElementById('cashAccountsList');
       bankCont.innerHTML = '';
@@ -708,12 +703,10 @@ function triggerLocalNotification(title, message) {
         else cashCont.innerHTML += itemHtml;
       });
 
-      // 3. Render Mutasi Style M-Banking & Utang Piutang
       renderMBankingFeed();
       renderDebtFeed();
     }
 
-    /* Mutasi Ala M-Banking (Group By Tanggal) */
     function renderMBankingFeed() {
       const feed = document.getElementById('mBankingTxFeed');
       const homeTx = document.getElementById('homeRecentTx');
@@ -790,7 +783,6 @@ function triggerLocalNotification(title, message) {
       }
     }
 
-    /* Render Utang & Piutang */
     function renderDebtFeed() {
       const pList = document.getElementById('piutangList');
       const uList = document.getElementById('utangList');
@@ -840,7 +832,6 @@ function triggerLocalNotification(title, message) {
       document.getElementById('totalUtangHome').innerText = formatRupiah(totUtang);
     }
 
-    /* Modal Catat Transaksi */
     function openTxModal(type) {
       currentTxType = type;
       setTxType(type);
@@ -962,7 +953,6 @@ function triggerLocalNotification(title, message) {
       saveState();
     }
 
-    /* Modal Edit & Hapus Akun (Hold to Delete 3 Detik) */
     function openEditAccountModal(accId) {
       const acc = accounts.find(a => a.id === accId);
       if (!acc) return;
@@ -999,7 +989,6 @@ function triggerLocalNotification(title, message) {
       document.getElementById('holdText').innerText = 'Tahan 3 detik untuk Hapus Akun';
     }
 
-    // Pasang Event Listener Hold to Delete (Mouse & Touchscreen)
     const btnHold = document.getElementById('btnDeleteHold');
 
     function startHold(e) {
@@ -1041,7 +1030,6 @@ function triggerLocalNotification(title, message) {
     btnHold.addEventListener('touchend', cancelHold);
     btnHold.addEventListener('touchcancel', cancelHold);
 
-    /* Utang & Piutang Logic */
     function openNewDebtModal() {
       populateAccountOptions();
       setDebtType('piutang');
@@ -1126,7 +1114,6 @@ function triggerLocalNotification(title, message) {
       saveState();
     }
 
-    /* Pelunasan Utang Piutang */
     function openSettleModal(debtId) {
       activeSettleItem = debts.find(d => d.id === debtId);
       if (!activeSettleItem) return;
@@ -1198,7 +1185,6 @@ function triggerLocalNotification(title, message) {
       saveState();
     }
 
-    /* Modal Tambah Akun Baru */
     function openNewAccountModal() {
       document.getElementById('accModal').classList.add('open');
     }
@@ -1240,7 +1226,6 @@ function triggerLocalNotification(title, message) {
       dl.click();
     }
 
-    
     requestNotificationPermission();
     loadProfileName();
     renderAll();

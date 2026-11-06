@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>DompetKu - Catatan Dompet & Kas</title>
-<link rel="manifest" href="./manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DompetKu">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DompetKu">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2454/2454269.png">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -22,46 +22,60 @@
       --income-green: #10b981;
       --expense-red: #f43f5e;
       --card-dark: #0f172a;
+      --nav-bg: #ffffff;
+      --pill-bg: #f1f5f9;
+    }
+
+    /* Variabel Khusus Dark Mode */
+    body.dark-mode {
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --border: #23304c;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-dark: #101726;
+      --nav-bg: #131b2e;
+      --pill-bg: #1e293b;
     }
 
     * { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: 'Plus Jakarta Sans', sans-serif; 
-  -webkit-tap-highlight-color: transparent; 
-  -webkit-touch-callout: none; /* Cegah menu pop-up saat tap lama di iOS/Android */
-  user-select: none;          /* Matikan fitur blok teks secara umum */
-  -webkit-user-select: none; 
-}
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+      -webkit-touch-callout: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
-/* Izinkan ketik/blok HANYA di kolom form input */
-input, select, textarea {
-  user-select: auto !important;
-  -webkit-user-select: auto !important;
-}
-    body { background: var(--bg); color: var(--text); padding-bottom: 95px; }
+    input, select, textarea {
+      user-select: auto !important;
+      -webkit-user-select: auto !important;
+    }
+
+    body { background: var(--bg); color: var(--text); padding-bottom: 95px; transition: background 0.2s ease, color 0.2s ease; }
 
     /* Top Bar */
     .top-navbar {
-      background: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+      background: var(--nav-bg); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
       border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20;
     }
     .nav-left { display: flex; align-items: center; gap: 14px; }
-    .icon-btn { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #334155; }
-    .profile-pill { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .icon-btn { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text); }
+    .profile-pill { background: var(--pill-bg); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: var(--text); }
 
     /* Sidebar Drawer */
     .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
     .sidebar {
-      position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #fff; z-index: 51;
+      position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: var(--card-bg); z-index: 51;
       transform: translateX(-100%); transition: 0.25s ease; padding: 24px 16px; display: flex; flex-direction: column;
     }
     .sidebar.open { transform: translateX(0); }
     .side-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
     .avatar { width: 44px; height: 44px; border-radius: 50%; background: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    .side-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #334155; }
-    .side-menu-item:hover, .side-menu-item.active { background: #f1f5f9; color: var(--primary-blue); }
+    .side-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .side-menu-item:hover, .side-menu-item.active { background: var(--pill-bg); color: var(--primary-blue); }
 
     /* Main Container */
     .view-content { width: 100%; max-width: 520px; margin: auto; padding: 16px; }
@@ -73,7 +87,7 @@ input, select, textarea {
     /* Beranda Cards */
     .net-worth-box {
       background: var(--card-dark); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 18px;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid var(--border);
     }
     .net-title { font-size: 0.75rem; letter-spacing: 1px; color: #94a3b8; font-weight: 600; }
     .net-val { font-size: 1.8rem; font-weight: 700; margin: 8px 0 16px 0; }
@@ -102,7 +116,7 @@ input, select, textarea {
 
     /* Utang Piutang Summary Cards */
     .debt-summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-    .debt-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; }
+    .debt-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px; cursor: pointer; }
     .debt-card-title { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
     .debt-card-val { font-size: 1.05rem; font-weight: 700; margin-top: 4px; }
 
@@ -112,29 +126,29 @@ input, select, textarea {
     .asset-section-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin: 18px 0 8px 0; text-transform: uppercase; }
     
     .account-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
       display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.15s ease;
     }
-    .account-card:active { transform: scale(0.98); background: #f8fafc; }
+    .account-card:active { transform: scale(0.98); background: var(--pill-bg); }
     .acc-left { display: flex; align-items: center; gap: 12px; }
-    .acc-icon { width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
-    .acc-info h4 { font-size: 0.9rem; font-weight: 600; }
+    .acc-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--pill-bg); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .acc-info h4 { font-size: 0.9rem; font-weight: 600; color: var(--text); }
     .acc-info p { font-size: 0.75rem; color: var(--text-muted); }
-    .acc-bal { font-size: 0.95rem; font-weight: 700; }
+    .acc-bal { font-size: 0.95rem; font-weight: 700; color: var(--text); }
 
     /* Mutasi M-Banking Style */
     .date-group { margin-bottom: 20px; }
     .date-header {
       display: flex; justify-content: space-between; align-items: center; padding: 6px 0;
-      border-bottom: 2px solid #cbd5e1; margin-bottom: 8px; font-size: 0.8rem; font-weight: 700; color: #475569;
+      border-bottom: 2px solid var(--border); margin-bottom: 8px; font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
     }
     .tx-item {
-      background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
       display: flex; justify-content: space-between; align-items: center;
     }
     .tx-left { display: flex; align-items: center; gap: 12px; }
-    .tx-icon { width: 36px; height: 36px; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-    .tx-title { font-size: 0.85rem; font-weight: 600; }
+    .tx-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--pill-bg); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .tx-title { font-size: 0.85rem; font-weight: 600; color: var(--text); }
     .tx-sub { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .tx-amount { font-size: 0.9rem; font-weight: 700; text-align: right; }
     .tx-inc { color: var(--income-green); }
@@ -143,16 +157,16 @@ input, select, textarea {
 
     /* Debt/Credit Cards */
     .debt-item-card {
-      background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
     }
     .debt-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .debt-person { font-size: 0.95rem; font-weight: 700; }
+    .debt-person { font-size: 0.95rem; font-weight: 700; color: var(--text); }
     .debt-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 8px; border-radius: 8px; }
     .badge-unpaid { background: #fee2e2; color: #b91c1c; }
     .badge-paid { background: #dcfce7; color: #15803d; }
     .debt-action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
-    .btn-settle { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
-    .btn-settle:active { background: #e2e8f0; }
+    .btn-settle { background: var(--pill-bg); border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer; color: var(--text); }
+    .btn-settle:active { background: var(--border); }
 
     /* Bottom Floating Buttons */
     .fab-group { position: fixed; bottom: 78px; right: 18px; display: flex; align-items: center; gap: 10px; z-index: 30; }
@@ -168,7 +182,7 @@ input, select, textarea {
 
     /* Bottom Nav Bar */
     .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border);
+      position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: 1px solid var(--border);
       height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 40;
     }
     .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: #94a3b8; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
@@ -176,31 +190,30 @@ input, select, textarea {
     .nav-tab i { font-size: 1.2rem; }
 
     /* Modal Bottom Sheet */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
     .modal-overlay.open { display: flex; }
     .modal-sheet {
-      background: #fff; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px;
-      width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease-out;
+      background: var(--card-bg); border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px;
+      width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease-out; color: var(--text);
     }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-    .type-switcher { display: flex; gap: 6px; margin-bottom: 14px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
-    .type-btn { flex: 1; border: none; padding: 8px 4px; border-radius: 8px; font-weight: 600; font-size: 0.75rem; cursor: pointer; background: transparent; color: #64748b; }
-    .type-btn.active { background: #fff; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .type-switcher { display: flex; gap: 6px; margin-bottom: 14px; background: var(--pill-bg); padding: 4px; border-radius: 10px; }
+    .type-btn { flex: 1; border: none; padding: 8px 4px; border-radius: 8px; font-weight: 600; font-size: 0.75rem; cursor: pointer; background: transparent; color: var(--text-muted); }
+    .type-btn.active { background: var(--card-bg); color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 
     .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
     .form-group input {
-      width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff;
+      width: 100%; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: var(--card-bg); color: var(--text);
     }
     .form-group select {
-      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; outline: none; background: #fff;
-      line-height: 1.4; color: #1e293b; font-weight: 500;
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.82rem; outline: none; background: var(--card-bg);
+      line-height: 1.4; color: var(--text); font-weight: 500;
     }
 
-    /* Searchable Selector Box */
     .search-filter-input {
-      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; margin-bottom: 6px; outline: none;
+      width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; margin-bottom: 6px; outline: none; background: var(--card-bg); color: var(--text);
     }
 
     .btn-submit-action {
@@ -233,7 +246,7 @@ input, select, textarea {
         🏢 <span id="profileNameDisplay">Keuangan Saya</span>
       </div>
     </div>
-    <div style="font-size: 1.1rem;">🔔</div>
+    <div style="font-size: 1.1rem; cursor:pointer;" onclick="openSettingsModal()">⚙️</div>
   </div>
 
   <!-- Sidebar Overlay -->
@@ -243,15 +256,19 @@ input, select, textarea {
       <div class="avatar">👨‍💻</div>
       <div>
         <h4 style="font-size: 0.95rem; font-weight: 700;" id="sideProfileNameDisplay">Keuangan Saya</h4>
-        <small style="color:var(--text-muted);">Personal & Ops Tracker</small>
+        <small style="color:var(--text-muted);">Personal</small>
       </div>
     </div>
     <div class="side-menu-item active" onclick="switchTab('beranda'); toggleSidebar();">🏠 Beranda</div>
     <div class="side-menu-item" onclick="switchTab('transaksi'); toggleSidebar();">📑 Riwayat & Mutasi</div>
     <div class="side-menu-item" onclick="switchTab('utangpiutang'); toggleSidebar();">🤝 Utang & Piutang</div>
     <div class="side-menu-item" onclick="switchTab('profil'); toggleSidebar();">💳 Profil (Rekening & Cash)</div>
+    
+    <!-- Tombol Pengaturan di Bawah Sidebar -->
     <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
-      <div class="side-menu-item" onclick="exportBackup()">💾 Backup Data (JSON)</div>
+      <div class="side-menu-item" onclick="openSettingsModal(); toggleSidebar();">
+        ⚙️ Pengaturan
+      </div>
     </div>
   </div>
 
@@ -275,14 +292,12 @@ input, select, textarea {
           </div>
         </div>
 
-        <!-- Rincian Berkelompok per Bank / Cash -->
         <div class="wallet-breakdown-card">
           <div class="breakdown-title">Akumulasi Saldo per Bank & Kas:</div>
           <div id="homeWalletBreakdown"></div>
         </div>
       </div>
 
-      <!-- Quick Debt Summary -->
       <div class="debt-summary-grid">
         <div class="debt-card" onclick="switchTab('utangpiutang')">
           <div class="debt-card-title">Piutang (Orang Utang ke Kita)</div>
@@ -570,14 +585,12 @@ input, select, textarea {
         </select>
       </div>
 
-      <!-- Pilih Bank / Dompet dengan Pencarian -->
       <div class="form-group" id="bankSelectionGroup">
         <label>Pilih Bank / E-Wallet Indonesia</label>
         <input type="text" class="search-filter-input" id="bankSearchInput" placeholder="🔍 Cari bank... (BCA, BNI, BRI, Seabank, Mandiri)" oninput="filterBankOptions()">
         <select id="newAccBankSelect" size="4"></select>
       </div>
 
-      <!-- Pilih Mata Uang Cash dengan Pencarian -->
       <div class="form-group" id="currencySelectionGroup" style="display:none;">
         <label>Pilih Mata Uang Tunai</label>
         <input type="text" class="search-filter-input" id="currencySearchInput" placeholder="🔍 Cari mata uang... (IDR, MYR, USD, SGD)" oninput="filterCurrencyOptions()">
@@ -598,8 +611,86 @@ input, select, textarea {
     </div>
   </div>
 
+  <!-- Modal Pengaturan Baru Lengkap -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeModalOnOut(event, 'settingsModal')">
+    <div class="modal-sheet" style="padding-bottom: 24px;">
+      <div class="sheet-head">
+        <h3 style="font-size: 1.05rem; font-weight: 700;">⚙️ Pengaturan Aplikasi</h3>
+        <button class="icon-btn" onclick="closeModal('settingsModal')">✕</button>
+      </div>
+
+      <!-- 1. Mode Gelap / Terang -->
+      <div class="form-group" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--border);">
+        <div>
+          <h4 style="font-size:0.9rem; font-weight:600;">Mode Gelap / Terang</h4>
+          <small style="color:var(--text-muted);">Sesuaikan tema pencahayaan</small>
+        </div>
+        <button class="btn-blue" style="padding: 6px 14px;" onclick="toggleTheme()" id="themeBtnToggle">🌙 Gelap</button>
+      </div>
+
+      <!-- 2. Cadangan & Pemulihan Data -->
+      <div style="margin-top: 14px; margin-bottom: 8px;">
+        <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Cadangan & Pemulihan</h4>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="account-card" style="width: 100%; border: 1px solid var(--border); cursor: pointer; text-align: left; margin-bottom: 0;" onclick="exportBackup()">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#eff6ff;">💾</div>
+            <div class="acc-info">
+              <h4>Cadangkan Data (JSON)</h4>
+              <p>Unduh file cadangan semua mutasi & saldo</p>
+            </div>
+          </div>
+        </button>
+
+        <button class="account-card" style="width: 100%; border: 1px solid var(--border); cursor: pointer; text-align: left; margin-bottom: 0;" onclick="document.getElementById('importFileInput').click()">
+          <div class="acc-left">
+            <div class="acc-icon" style="background:#fef3c7;">📥</div>
+            <div class="acc-info">
+              <h4>Pulihkan Data (Restore)</h4>
+              <p>Muat data dari file cadangan .json lama</p>
+            </div>
+          </div>
+        </button>
+        <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importBackupData(event)">
+      </div>
+
+      <!-- 3. Ekspor Laporan Excel/CSV -->
+      <div style="margin-top: 14px; margin-bottom: 8px;">
+        <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Laporan Pembukuan</h4>
+      </div>
+      <button class="account-card" style="width: 100%; border: 1px solid var(--border); cursor: pointer; text-align: left; margin-bottom: 0;" onclick="exportCSV()">
+        <div class="acc-left">
+          <div class="acc-icon" style="background:#ecfdf5;">📊</div>
+          <div class="acc-info">
+            <h4>Unduh Rekap Mutasi (.CSV)</h4>
+            <p>Bisa dibuka langsung di Excel / Spreadsheet</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- 4. Reset Data Aplikasi -->
+      <div style="margin-top: 14px; margin-bottom: 8px;">
+        <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Pembersihan</h4>
+      </div>
+      <button class="btn-hold-delete" style="margin-top: 0;" onclick="resetAllAppData()">
+        🗑️ Reset Seluruh Data (Mulai dari Nol)
+      </button>
+
+      <!-- 5. Tentang Aplikasi -->
+      <div style="background:var(--pill-bg); border-radius:12px; padding:12px; margin-top:20px; text-align:center;">
+        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 4px;">DompetKu Tracker</h4>
+        <p style="font-size: 0.75rem; color: var(--text-muted); line-height: 1.5;">
+          Versi 1.2 • PWA Offline Ready<br>
+          Dibuat oleh: <strong>Rizqi Robbani Auliya Darussalam</strong><br>
+          Penyimpanan data lokal mandiri di perangkat.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
   <script>
-    // Master Data Bank & E-Wallet Lengkap Indonesia
     const INDONESIA_BANKS = [
       "Bank BNI", "Bank BCA", "Bank Mandiri", "Bank BRI", "Bank Syariah Indonesia (BSI)",
       "Bank CIMB Niaga", "Bank Permata", "Bank Danamon", "Bank Tabungan Negara (BTN)",
@@ -610,7 +701,6 @@ input, select, textarea {
       "GoPay", "OVO", "DANA", "ShopeePay", "LinkAja"
     ];
 
-    // Master Data Mata Uang Dunia Lengkap
     const CURRENCIES = [
       { code: "IDR", name: "Rupiah Indonesia (IDR)" },
       { code: "MYR", name: "Ringgit Malaysia (MYR)" },
@@ -628,7 +718,6 @@ input, select, textarea {
       { code: "AED", name: "Dirham Uni Emirat Arab (AED)" }
     ];
 
-    // State Awal
     const defaultAccounts = [
       { id: 'acc_1', bankGroup: 'Bank BNI', name: 'Rekening Utama (Pribadi)', type: 'bank', currency: 'IDR', balance: 4362886 },
       { id: 'acc_2', bankGroup: 'Bank BNI', name: 'Sangu Ops 5 Nov', type: 'bank', currency: 'IDR', balance: 108200 },
@@ -649,6 +738,35 @@ input, select, textarea {
 
     function formatRupiah(num) {
       return "Rp" + Math.round(Number(num) || 0).toLocaleString("id-ID");
+    }
+
+    /* Sistem Dark / Light Mode */
+    function applySavedTheme() {
+      const savedTheme = localStorage.getItem('dompetku_theme') || 'light';
+      const btn = document.getElementById('themeBtnToggle');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (btn) btn.innerText = '☀️ Terang';
+      } else {
+        document.body.classList.remove('dark-mode');
+        if (btn) btn.innerText = '🌙 Gelap';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      const btn = document.getElementById('themeBtnToggle');
+      if (isDark) {
+        localStorage.setItem('dompetku_theme', 'dark');
+        btn.innerText = '☀️ Terang';
+      } else {
+        localStorage.setItem('dompetku_theme', 'light');
+        btn.innerText = '🌙 Gelap';
+      }
+    }
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.add('open');
     }
 
     function loadProfileName() {
@@ -737,7 +855,6 @@ input, select, textarea {
       document.getElementById('actionMenuModal').classList.add('open');
     }
 
-    // Render Utama: Melakukan Grouping Total Saldo per Bank di Beranda
     function renderAll() {
       let totalNet = 0;
       let totalInc = 0;
@@ -754,7 +871,6 @@ input, select, textarea {
       document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
       document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
 
-      // 1. Grouping Pos Saldo berdasarkan Bank/Dompet Induk
       const groupedData = {};
       accounts.forEach(acc => {
         const groupKey = acc.bankGroup || (acc.type === 'bank' ? 'Bank Lain' : 'Uang Tunai (Cash)');
@@ -797,7 +913,6 @@ input, select, textarea {
         `;
       }
 
-      // 2. Render Tab Profil (Rekening Bank & Cash)
       const bankCont = document.getElementById('bankAccountsList');
       const cashCont = document.getElementById('cashAccountsList');
       bankCont.innerHTML = '';
@@ -930,7 +1045,7 @@ input, select, textarea {
             </div>
             ${!d.paid ? `
               <div class="debt-action-row">
-                <span style="font-size:0.75rem; color:var(--text-muted);">Sumber awal: ${d.walletName}</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">Sumber: ${d.walletName}</span>
                 <button class="btn-settle" onclick="openSettleModal('${d.id}')">
                   ${d.type === 'piutang' ? 'Terima Pelunasan' : 'Bayar Sekarang'}
                 </button>
@@ -1332,7 +1447,6 @@ input, select, textarea {
       triggerLocalNotification("DompetKu: Pelunasan Berhasil", notifLunas);
     }
 
-    // Modal Tambah Akun Baru dengan Pilihan Bank & Mata Uang Dinamis
     function openNewAccountModal() {
       populateBankSelect();
       populateCurrencySelect();
@@ -1392,7 +1506,7 @@ input, select, textarea {
       const ownerName = document.getElementById('newAccOwnerName').value.trim();
       const bal = parseFormattedNumber(document.getElementById('newAccBalance').value);
 
-      if (!ownerName) return alert('Nama pos/alokasi uang wajib diisi! (Misal: Uang Pribadi / Ops 6 Nov)');
+      if (!ownerName) return alert('Nama pos/alokasi uang wajib diisi!');
 
       let bankGroup = '';
       let currencyCode = 'IDR';
@@ -1429,6 +1543,7 @@ input, select, textarea {
       if (e.target.id === id) closeModal(id);
     }
 
+    /* Cadangkan Data (Backup) */
     function exportBackup() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ accounts, transactions, debts }, null, 2));
       const dl = document.createElement('a');
@@ -1437,6 +1552,69 @@ input, select, textarea {
       dl.click();
     }
 
+    /* Pulihkan Data (Restore) */
+    function importBackupData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.accounts && data.transactions) {
+            if (confirm("Yakin ingin memulihkan data ini? Saldo dan riwayat mutasi saat ini akan ditimpa dengan data cadangan.")) {
+              accounts = data.accounts;
+              transactions = data.transactions;
+              debts = data.debts || [];
+              saveState();
+              alert("Data berhasil dipulihkan!");
+              closeModal('settingsModal');
+            }
+          } else {
+            alert("Format file JSON cadangan tidak valid!");
+          }
+        } catch (err) {
+          alert("Gagal membaca file JSON!");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* Unduh Rekap Mutasi ke File CSV / Excel */
+    function exportCSV() {
+      if (transactions.length === 0) return alert("Belum ada riwayat mutasi untuk diunduh!");
+      
+      let csvContent = "\uFEFFTanggal,Nama Transaksi,Kategori,Pos Akun,Tipe,Nominal\n";
+      transactions.forEach(t => {
+        let typeText = t.type === 'income' ? 'Pemasukan' : (t.type === 'expense' ? 'Pengeluaran' : 'Transfer');
+        let row = `"${t.dateFormatted || t.rawDate}","${t.desc.replace(/"/g, '""')}","${t.category}","${t.accountName}","${typeText}","${t.amount}"`;
+        csvContent += row + "\n";
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `rekap_mutasi_dompetku_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    /* Reset Data Bersih */
+    function resetAllAppData() {
+      if (confirm("Peringatan: Seluruh catatan rekening, mutasi, dan utang piutang akan dihapus permanen kembali ke kosong. Lanjutkan?")) {
+        accounts = [];
+        transactions = [];
+        debts = [];
+        saveState();
+        alert("Aplikasi telah dibersihkan kembali ke awal!");
+        closeModal('settingsModal');
+      }
+    }
+
+    /* Inisialisasi Saat Halaman Dibuka */
+    applySavedTheme();
     requestNotificationPermission();
     loadProfileName();
     renderAll();

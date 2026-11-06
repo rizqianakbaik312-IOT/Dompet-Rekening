@@ -2,203 +2,592 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dompet & Kas Ops Mandiri</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Meld App Clone</title>
   <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
-      --primary: #38bdf8; --border: #334155; --danger: #f87171; --success: #4ade80;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --primary-blue: #2563eb;
+      --primary-yellow: #f59e0b;
+      --income-green: #10b981;
+      --expense-red: #f43f5e;
+      --card-dark: #0f172a;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 16px; max-width: 600px; margin: auto; }
-    h1 { font-size: 1.25rem; margin-bottom: 12px; }
-    h2 { font-size: 1rem; margin-bottom: 8px; color: var(--primary); }
 
-    .grid-accounts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-    .acc-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
-    .acc-title { font-size: 0.8rem; color: #94a3b8; }
-    .acc-balance { font-size: 1.1rem; font-weight: bold; margin-top: 4px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
 
-    .action-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-    .form-group { margin-bottom: 10px; }
-    label { display: block; font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
-    input, select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: #fff; font-size: 0.9rem; }
-    button { width: 100%; padding: 10px; background: var(--primary); border: none; border-radius: 6px; color: #0f172a; font-weight: bold; cursor: pointer; font-size: 0.9rem; margin-top: 6px; }
-    button:active { opacity: 0.8; }
+    /* Top Bar */
+    .top-navbar {
+      background: #fff; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 20;
+    }
+    .nav-left { display: flex; align-items: center; gap: 14px; }
+    .icon-btn { background: none; border: none; font-size: 1.25rem; cursor: pointer; color: #334155; }
+    .profile-pill { background: #f1f5f9; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
 
-    .log-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-    .log-transfer { color: var(--primary); }
-    .text-success { color: var(--success); }
-    .text-danger { color: var(--danger); }
+    /* Sidebar Drawer */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 280px; background: #fff; z-index: 51;
+      transform: translateX(-100%); transition: 0.25s ease; padding: 24px 16px; display: flex; flex-direction: column;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .side-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+    .avatar { width: 44px; height: 44px; border-radius: 50%; background: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+    .side-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #334155; }
+    .side-menu-item:hover, .side-menu-item.active { background: #f1f5f9; color: var(--primary-blue); }
+
+    /* Main Container */
+    .view-content { max-width: 480px; margin: auto; padding: 16px; }
+
+    /* Views */
+    .tab-view { display: none; }
+    .tab-view.active { display: block; }
+
+    /* Beranda (Net Worth) */
+    .net-worth-box {
+      background: var(--card-dark); color: #fff; border-radius: 20px; padding: 20px; margin-bottom: 18px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    .net-title { font-size: 0.75rem; letter-spacing: 1px; color: #94a3b8; font-weight: 600; }
+    .net-val { font-size: 1.8rem; font-weight: 700; margin: 8px 0 18px 0; }
+    .inc-exp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #334155; padding-top: 14px; }
+    .inc-exp-item span { font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 2px; }
+    .inc-exp-item strong { font-size: 0.95rem; }
+
+    /* Profil Keuangan (Assets: Bank & Cash) */
+    .asset-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .btn-blue { background: var(--primary-blue); color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    
+    .asset-section-title { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin: 18px 0 8px 0; text-transform: uppercase; }
+    .account-card {
+      background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 10px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .acc-left { display: flex; align-items: center; gap: 12px; }
+    .acc-icon { width: 38px; height: 38px; border-radius: 10px; background: #eff6ff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+    .acc-info h4 { font-size: 0.9rem; font-weight: 600; }
+    .acc-info p { font-size: 0.75rem; color: var(--text-muted); }
+    .acc-bal { font-size: 0.95rem; font-weight: 700; }
+
+    /* Riwayat Transaksi List */
+    .tx-item {
+      background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .tx-left { display: flex; align-items: center; gap: 12px; }
+    .tx-icon { width: 36px; height: 36px; border-radius: 10px; background: #f8fafc; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .tx-title { font-size: 0.85rem; font-weight: 600; }
+    .tx-sub { font-size: 0.7rem; color: var(--text-muted); }
+    .tx-amount { font-size: 0.9rem; font-weight: 700; text-align: right; }
+    .tx-inc { color: var(--income-green); }
+    .tx-exp { color: var(--expense-red); }
+    .tx-tf { color: var(--primary-blue); }
+
+    /* Bottom Floating Action Buttons */
+    .fab-group { position: fixed; bottom: 80px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 30; }
+    .fab-catat {
+      background: var(--primary-blue); color: #fff; border: none; border-radius: 24px; padding: 12px 20px;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+    .fab-plus {
+      width: 52px; height: 52px; border-radius: 50%; background: var(--primary-yellow); color: #fff;
+      border: none; font-size: 1.5rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 16px rgba(245,158,11,0.4);
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border);
+      height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 40;
+    }
+    .nav-tab { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: #94a3b8; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
+    .nav-tab.active { color: var(--primary-blue); }
+    .nav-tab i { font-size: 1.2rem; }
+
+    /* Modal Bottom Sheet */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-sheet {
+      background: #fff; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px;
+      width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.2s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .type-switcher { display: flex; gap: 8px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 10px; }
+    .type-btn { flex: 1; border: none; padding: 8px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; background: transparent; color: #64748b; }
+    .type-btn.active { background: #fff; color: var(--text); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.75rem; font-weight: 700; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 0.9rem; outline: none; background: #fff;
+    }
+    .btn-submit-action {
+      width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary-blue); color: #fff;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <h1>💰 Dompet & Kas Ops</h1>
-
-  <!-- Saldo Tiap Dompet -->
-  <div class="grid-accounts" id="accountGrid"></div>
-
-  <!-- Form Transfer Antar Rekening/Dompet -->
-  <div class="action-box">
-    <h2>Pindah Saldo (Transfer)</h2>
-    <div class="form-group">
-      <label>Dari:</label>
-      <select id="fromAcc"></select>
+  <!-- Top Navbar -->
+  <div class="top-navbar">
+    <div class="nav-left">
+      <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+      <div class="profile-pill">🏢 Keuangan Rizqi</div>
     </div>
-    <div class="form-group">
-      <label>Ke:</label>
-      <select id="toAcc"></select>
-    </div>
-    <div class="form-group">
-      <label>Nominal (Rp):</label>
-      <input type="number" id="transferAmount" placeholder="Contoh: 150000">
-    </div>
-    <div class="form-group">
-      <label>Keterangan:</label>
-      <input type="text" id="transferNote" placeholder="Misal: Rembes ops / tarik tunai">
-    </div>
-    <button onclick="handleTransfer()">Pindahkan Saldo</button>
+    <div style="font-size: 1.1rem;">🔔</div>
   </div>
 
-  <!-- Form Transaksi Cepat -->
-  <div class="action-box">
-    <h2>Catat Masuk / Keluar</h2>
-    <div class="form-group">
-      <label>Akun Dompet:</label>
-      <select id="quickAcc"></select>
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sideOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="side-profile">
+      <div class="avatar">👨‍💻</div>
+      <div>
+        <h4 style="font-size: 0.95rem; font-weight: 700;">Keuangan Rizqi</h4>
+        <small style="color:var(--text-muted);">Personal & Ops Tracker</small>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Tipe:</label>
-      <select id="quickType">
-        <option value="expense">Pengeluaran (-)</option>
-        <option value="income">Pemasukan (+)</option>
-      </select>
+    <div class="side-menu-item active" onclick="switchTab('beranda'); toggleSidebar();">🏠 Beranda</div>
+    <div class="side-menu-item" onclick="switchTab('transaksi'); toggleSidebar();">📑 Riwayat Transaksi</div>
+    <div class="side-menu-item" onclick="switchTab('profil'); toggleSidebar();">💳 Profil (Rekening & Cash)</div>
+    <div style="margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
+      <div class="side-menu-item" onclick="exportBackup()">💾 Backup Data (JSON)</div>
     </div>
-    <div class="form-group">
-      <label>Nominal (Rp):</label>
-      <input type="number" id="quickAmount" placeholder="Contoh: 25000">
-    </div>
-    <div class="form-group">
-      <label>Keterangan:</label>
-      <input type="text" id="quickNote" placeholder="Misal: Beli makan siang / transport">
-    </div>
-    <button onclick="handleQuickEntry()">Simpan Transaksi</button>
   </div>
 
-  <!-- Riwayat Transaksi -->
-  <div class="action-box">
-    <h2>Riwayat Terakhir</h2>
-    <div id="logList"></div>
+  <!-- Main View Screens -->
+  <div class="view-content">
+
+    <!-- 1. TAB BERANDA -->
+    <div class="tab-view active" id="view-beranda">
+      <div class="net-worth-box">
+        <div class="net-title">TOTAL UANG SAYA (NET WORTH)</div>
+        <div class="net-val" id="netWorthDisplay">Rp 0</div>
+        <div class="inc-exp-grid">
+          <div class="inc-exp-item">
+            <span>Pemasukan</span>
+            <strong style="color:var(--income-green)" id="homeIncomeDisplay">+Rp 0</strong>
+          </div>
+          <div class="inc-exp-item">
+            <span>Pengeluaran</span>
+            <strong style="color:var(--expense-red)" id="homeExpenseDisplay">-Rp 0</strong>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size:0.95rem; margin-bottom:12px;">Transaksi Terakhir</h3>
+      <div id="homeRecentTx"></div>
+    </div>
+
+    <!-- 2. TAB TRANSAKSI -->
+    <div class="tab-view" id="view-transaksi">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 14px;">
+        <h2 style="font-size: 1.1rem; font-weight: 700;">Semua Transaksi</h2>
+        <span style="font-size:0.75rem; color:var(--text-muted);" id="txCountBadge">0 Transaksi</span>
+      </div>
+      <div id="allTxFeed"></div>
+    </div>
+
+    <!-- 3. TAB PROFIL (REKENING & CASH) -->
+    <div class="tab-view" id="view-profil">
+      <div class="asset-header-bar">
+        <div>
+          <h2 style="font-size:1.1rem; font-weight:700;">Profil Keuangan</h2>
+          <p style="font-size:0.75rem; color:var(--text-muted);">Kelola Rekening Bank & Cash</p>
+        </div>
+        <button class="btn-blue" onclick="openNewAccountModal()">+ Tambah Rekening</button>
+      </div>
+
+      <div class="asset-section-title">Rekening Bank & E-Wallet</div>
+      <div id="bankAccountsList"></div>
+
+      <div class="asset-section-title">Uang Tunai / Cash</div>
+      <div id="cashAccountsList"></div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Floating Action Buttons -->
+  <div class="fab-group">
+    <button class="fab-catat" onclick="openTxModal('expense')">+ Catat</button>
+    <button class="fab-plus" onclick="openTxModal('expense')">+</button>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="nav-tab active" id="tabBtn-beranda" onclick="switchTab('beranda')">
+      <i>🏠</i>
+      <span>Beranda</span>
+    </button>
+    <button class="nav-tab" id="tabBtn-transaksi" onclick="switchTab('transaksi')">
+      <i>📑</i>
+      <span>Transaksi</span>
+    </button>
+    <button class="nav-tab" id="tabBtn-profil" onclick="switchTab('profil')">
+      <i>👤</i>
+      <span>Profil</span>
+    </button>
+  </div>
+
+  <!-- Modal Tambah Transaksi (Add Transaction) -->
+  <div class="modal-overlay" id="txModal" onclick="closeModalOnOut(event, 'txModal')">
+    <div class="modal-sheet">
+      <div class="sheet-head">
+        <h3 style="font-size: 1rem; font-weight: 700;">Catat Transaksi</h3>
+        <button class="icon-btn" onclick="closeModal('txModal')">✕</button>
+      </div>
+
+      <div class="type-switcher">
+        <button class="type-btn active" id="typeExp" onclick="setTxType('expense')">Pengeluaran (-)</button>
+        <button class="type-btn" id="typeInc" onclick="setTxType('income')">Pemasukan (+)</button>
+        <button class="type-btn" id="typeTf" onclick="setTxType('transfer')">Transfer (🔁)</button>
+      </div>
+
+      <div class="form-group">
+        <label>Nominal (Rp)</label>
+        <input type="number" id="txAmount" placeholder="0">
+      </div>
+
+      <div class="form-group">
+        <label>Nama / Catatan</label>
+        <input type="text" id="txDesc" placeholder="Misal: Beli makan siang / bensin ops">
+      </div>
+
+      <div class="form-group" id="categoryGroup">
+        <label>Kategori</label>
+        <select id="txCategory">
+          <option value="Makan & Minum">Makan & Minum</option>
+          <option value="Operasional Lapangan">Operasional Lapangan</option>
+          <option value="Transportasi">Transportasi</option>
+          <option value="Komponen & Belanja">Komponen & Belanja</option>
+          <option value="Gaji & Rembes">Gaji & Rembes</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+
+      <!-- Pilihan Aset untuk Income/Expense -->
+      <div class="form-group" id="singleAccountGroup">
+        <label id="assetLabel">Keluarkan Dari Aset</label>
+        <select id="txAsset"></select>
+      </div>
+
+      <!-- Pilihan Aset Khusus Transfer -->
+      <div id="transferAccountGroup" style="display:none;">
+        <div class="form-group">
+          <label>Dari Sumber Aset</label>
+          <select id="tfSource"></select>
+        </div>
+        <div class="form-group">
+          <label>Ke Tujuan Aset</label>
+          <select id="tfTarget"></select>
+        </div>
+      </div>
+
+      <button class="btn-submit-action" id="submitTxBtn" onclick="saveTransaction()">Simpan Transaksi</button>
+    </div>
+  </div>
+
+  <!-- Modal Tambah Rekening/Cash Baru -->
+  <div class="modal-overlay" id="accModal" onclick="closeModalOnOut(event, 'accModal')">
+    <div class="modal-sheet">
+      <div class="sheet-head">
+        <h3 style="font-size: 1rem; font-weight: 700;">Tambah Rekening / Cash</h3>
+        <button class="icon-btn" onclick="closeModal('accModal')">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Tipe Aset</label>
+        <select id="newAccType">
+          <option value="bank">Rekening Bank / E-Wallet</option>
+          <option value="cash">Uang Tunai / Cash</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Nama Akun</label>
+        <input type="text" id="newAccName" placeholder="Contoh: BCA, BNI, Cash Lapangan">
+      </div>
+      <div class="form-group">
+        <label>Saldo Awal (Rp)</label>
+        <input type="number" id="newAccBalance" value="0">
+      </div>
+      <button class="btn-submit-action" onclick="saveNewAccount()">Tambahkan Akun</button>
+    </div>
   </div>
 
   <script>
-    const defaultAccounts = {
-      "rek_pribadi": { name: "Rekening Pribadi", balance: 0 },
-      "rek_ops": { name: "Rekening Ops", balance: 0 },
-      "cash_pribadi": { name: "Cash Pribadi", balance: 0 },
-      "cash_ops": { name: "Cash Ops", balance: 0 }
-    };
+    // State Awal
+    const defaultAccounts = [
+      { id: 'acc_1', name: 'BNI Rekening Utama', type: 'bank', balance: 4521000 },
+      { id: 'acc_2', name: 'Rekening Operasional', type: 'bank', balance: 1500000 },
+      { id: 'acc_3', name: 'Cash Pribadi', type: 'cash', balance: 80000 },
+      { id: 'acc_4', name: 'Cash Ops Lapangan', type: 'cash', balance: 200000 }
+    ];
 
-    let accounts = JSON.parse(localStorage.getItem('wallets')) || defaultAccounts;
-    let logs = JSON.parse(localStorage.getItem('wallet_logs')) || [];
+    let accounts = JSON.parse(localStorage.getItem('meld_accounts')) || defaultAccounts;
+    let transactions = JSON.parse(localStorage.getItem('meld_transactions')) || [];
+    let currentTxType = 'expense';
 
     function formatRupiah(num) {
-      return "Rp " + Number(num).toLocaleString("id-ID");
+      return "Rp" + Number(num).toLocaleString("id-ID");
     }
 
     function saveState() {
-      localStorage.setItem('wallets', JSON.stringify(accounts));
-      localStorage.setItem('wallet_logs', JSON.stringify(logs));
-      render();
+      localStorage.setItem('meld_accounts', JSON.stringify(accounts));
+      localStorage.setItem('meld_transactions', JSON.stringify(transactions));
+      renderAll();
     }
 
-    function render() {
-      const grid = document.getElementById('accountGrid');
-      grid.innerHTML = '';
-      const fromSelect = document.getElementById('fromAcc');
-      const toSelect = document.getElementById('toAcc');
-      const quickSelect = document.getElementById('quickAcc');
-      
-      fromSelect.innerHTML = '';
-      toSelect.innerHTML = '';
-      quickSelect.innerHTML = '';
+    /* Tab Switching */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
 
-      for (let key in accounts) {
-        const acc = accounts[key];
-        grid.innerHTML += `
-          <div class="acc-card">
-            <div class="acc-title">${acc.name}</div>
-            <div class="acc-balance">${formatRupiah(acc.balance)}</div>
-          </div>
-        `;
-        fromSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
-        toSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
-        quickSelect.innerHTML += `<option value="${key}">${acc.name}</option>`;
-      }
-
-      const logList = document.getElementById('logList');
-      logList.innerHTML = logs.length === 0 ? '<p style="color:#64748b; font-size:0.85rem;">Belum ada riwayat transaksi</p>' : '';
-      logs.slice(0, 10).forEach(item => {
-        logList.innerHTML += `
-          <div class="log-item">
-            <span>${item.desc}</span>
-            <strong class="${item.type === 'transfer' ? 'log-transfer' : (item.type === 'income' ? 'text-success' : 'text-danger')}">
-              ${item.amount}
-            </strong>
-          </div>
-        `;
-      });
+      document.getElementById('view-' + tabId).classList.add('active');
+      document.getElementById('tabBtn-' + tabId).classList.add('active');
     }
 
-    function handleTransfer() {
-      const from = document.getElementById('fromAcc').value;
-      const to = document.getElementById('toAcc').value;
-      const amt = parseFloat(document.getElementById('transferAmount').value);
-      const note = document.getElementById('transferNote').value || 'Pindah Saldo';
-
-      if (!amt || amt <= 0) return alert("Masukkan nominal yang valid!");
-      if (from === to) return alert("Akun asal dan tujuan tidak boleh sama!");
-      if (accounts[from].balance < amt) return alert("Saldo di akun asal tidak mencukupi!");
-
-      accounts[from].balance -= amt;
-      accounts[to].balance += amt;
-
-      logs.unshift({
-        type: 'transfer',
-        desc: `[Pindah] ${accounts[from].name} ➔ ${accounts[to].name} (${note})`,
-        amount: formatRupiah(amt)
-      });
-
-      document.getElementById('transferAmount').value = '';
-      document.getElementById('transferNote').value = '';
-      saveState();
-    }
-
-    function handleQuickEntry() {
-      const target = document.getElementById('quickAcc').value;
-      const type = document.getElementById('quickType').value;
-      const amt = parseFloat(document.getElementById('quickAmount').value);
-      const note = document.getElementById('quickNote').value || (type === 'income' ? 'Pemasukan' : 'Pengeluaran');
-
-      if (!amt || amt <= 0) return alert("Masukkan nominal yang valid!");
-
-      if (type === 'expense') {
-        if (accounts[target].balance < amt) return alert("Saldo tidak mencukupi!");
-        accounts[target].balance -= amt;
-        logs.unshift({ type: 'expense', desc: `[-] ${accounts[target].name}: ${note}`, amount: `-${formatRupiah(amt)}` });
+    function toggleSidebar() {
+      const sb = document.getElementById('sidebar');
+      const so = document.getElementById('sideOverlay');
+      if (sb.classList.contains('open')) {
+        sb.classList.remove('open');
+        so.style.display = 'none';
       } else {
-        accounts[target].balance += amt;
-        logs.unshift({ type: 'income', desc: `[+] ${accounts[target].name}: ${note}`, amount: `+${formatRupiah(amt)}` });
+        sb.classList.add('open');
+        so.style.display = 'block';
+      }
+    }
+
+    /* Render Logic */
+    function renderAll() {
+      let totalNet = 0;
+      let totalInc = 0;
+      let totalExp = 0;
+
+      // 1. Hitung Net Worth
+      accounts.forEach(a => totalNet += a.balance);
+      transactions.forEach(t => {
+        if (t.type === 'income') totalInc += t.amount;
+        if (t.type === 'expense') totalExp += t.amount;
+      });
+
+      document.getElementById('netWorthDisplay').innerText = formatRupiah(totalNet);
+      document.getElementById('homeIncomeDisplay').innerText = "+" + formatRupiah(totalInc);
+      document.getElementById('homeExpenseDisplay').innerText = "-" + formatRupiah(totalExp);
+      document.getElementById('txCountBadge').innerText = transactions.length + " Transaksi";
+
+      // 2. Render Profil Aset (Bank & Cash)
+      const bankCont = document.getElementById('bankAccountsList');
+      const cashCont = document.getElementById('cashAccountsList');
+      bankCont.innerHTML = '';
+      cashCont.innerHTML = '';
+
+      accounts.forEach(acc => {
+        const itemHtml = `
+          <div class="account-card">
+            <div class="acc-left">
+              <div class="acc-icon">${acc.type === 'bank' ? '💳' : '💵'}</div>
+              <div class="acc-info">
+                <h4>${acc.name}</h4>
+                <p>${acc.type === 'bank' ? 'Bank / Digital' : 'Tunai / Cash'}</p>
+              </div>
+            </div>
+            <div class="acc-bal">${formatRupiah(acc.balance)}</div>
+          </div>
+        `;
+        if (acc.type === 'bank') bankCont.innerHTML += itemHtml;
+        else cashCont.innerHTML += itemHtml;
+      });
+
+      // 3. Render Riwayat di Beranda & Tab Transaksi
+      const homeTx = document.getElementById('homeRecentTx');
+      const allTx = document.getElementById('allTxFeed');
+      homeTx.innerHTML = '';
+      allTx.innerHTML = '';
+
+      if (transactions.length === 0) {
+        homeTx.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:20px;">Belum ada catatan transaksi</p>';
+        allTx.innerHTML = '<p style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:20px;">Belum ada riwayat transaksi</p>';
+      } else {
+        transactions.forEach((tx, idx) => {
+          let cls = tx.type === 'income' ? 'tx-inc' : (tx.type === 'expense' ? 'tx-exp' : 'tx-tf');
+          let sign = tx.type === 'income' ? '+' : (tx.type === 'expense' ? '-' : '');
+          let txHtml = `
+            <div class="tx-item">
+              <div class="tx-left">
+                <div class="tx-icon">${tx.type === 'income' ? '📥' : (tx.type === 'expense' ? '📤' : '🔁')}</div>
+                <div>
+                  <div class="tx-title">${tx.desc}</div>
+                  <div class="tx-sub">${tx.accountName} • ${tx.category} • ${tx.date}</div>
+                </div>
+              </div>
+              <div class="tx-amount ${cls}">${sign}${formatRupiah(tx.amount)}</div>
+            </div>
+          `;
+          if (idx < 5) homeTx.innerHTML += txHtml;
+          allTx.innerHTML += txHtml;
+        });
+      }
+    }
+
+    /* Modal Catat Transaksi */
+    function openTxModal(type) {
+      currentTxType = type;
+      setTxType(type);
+      populateAccountOptions();
+      document.getElementById('txModal').classList.add('open');
+    }
+
+    function setTxType(type) {
+      currentTxType = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      if (type === 'expense') {
+        document.getElementById('typeExp').classList.add('active');
+        document.getElementById('categoryGroup').style.display = 'block';
+        document.getElementById('singleAccountGroup').style.display = 'block';
+        document.getElementById('transferAccountGroup').style.display = 'none';
+        document.getElementById('assetLabel').innerText = 'Keluarkan Dari Aset:';
+      } else if (type === 'income') {
+        document.getElementById('typeInc').classList.add('active');
+        document.getElementById('categoryGroup').style.display = 'block';
+        document.getElementById('singleAccountGroup').style.display = 'block';
+        document.getElementById('transferAccountGroup').style.display = 'none';
+        document.getElementById('assetLabel').innerText = 'Masukkan Ke Aset:';
+      } else if (type === 'transfer') {
+        document.getElementById('typeTf').classList.add('active');
+        document.getElementById('categoryGroup').style.display = 'none';
+        document.getElementById('singleAccountGroup').style.display = 'none';
+        document.getElementById('transferAccountGroup').style.display = 'block';
+      }
+    }
+
+    function populateAccountOptions() {
+      const assetSel = document.getElementById('txAsset');
+      const tfSrc = document.getElementById('tfSource');
+      const tfTar = document.getElementById('tfTarget');
+
+      assetSel.innerHTML = '';
+      tfSrc.innerHTML = '';
+      tfTar.innerHTML = '';
+
+      accounts.forEach(a => {
+        let opt = `<option value="${a.id}">${a.name} (${formatRupiah(a.balance)})</option>`;
+        assetSel.innerHTML += opt;
+        tfSrc.innerHTML += opt;
+        tfTar.innerHTML += opt;
+      });
+    }
+
+    function saveTransaction() {
+      const amt = parseFloat(document.getElementById('txAmount').value);
+      const desc = document.getElementById('txDesc').value.trim() || 'Transaksi';
+      const cat = document.getElementById('txCategory').value;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+
+      if (!amt || amt <= 0) return alert('Masukkan nominal valid!');
+
+      if (currentTxType === 'transfer') {
+        const fromId = document.getElementById('tfSource').value;
+        const toId = document.getElementById('tfTarget').value;
+        if (fromId === toId) return alert('Aset sumber dan tujuan tidak boleh sama!');
+
+        let fromAcc = accounts.find(a => a.id === fromId);
+        let toAcc = accounts.find(a => a.id === toId);
+
+        if (fromAcc.balance < amt) return alert('Saldo aset sumber tidak cukup!');
+        fromAcc.balance -= amt;
+        toAcc.balance += amt;
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: desc,
+          amount: amt,
+          type: 'transfer',
+          category: 'Pindah Saldo',
+          accountName: `${fromAcc.name} ➔ ${toAcc.name}`,
+          date: dateStr
+        });
+      } else {
+        const targetId = document.getElementById('txAsset').value;
+        let targetAcc = accounts.find(a => a.id === targetId);
+
+        if (currentTxType === 'expense') {
+          if (targetAcc.balance < amt) return alert('Saldo aset tidak mencukupi!');
+          targetAcc.balance -= amt;
+        } else {
+          targetAcc.balance += amt;
+        }
+
+        transactions.unshift({
+          id: Date.now(),
+          desc: desc,
+          amount: amt,
+          type: currentTxType,
+          category: cat,
+          accountName: targetAcc.name,
+          date: dateStr
+        });
       }
 
-      document.getElementById('quickAmount').value = '';
-      document.getElementById('quickNote').value = '';
+      // Reset & Save
+      document.getElementById('txAmount').value = '';
+      document.getElementById('txDesc').value = '';
+      closeModal('txModal');
       saveState();
     }
 
-    render();
+    /* Modal Tambah Akun */
+    function openNewAccountModal() {
+      document.getElementById('accModal').classList.add('open');
+    }
+
+    function saveNewAccount() {
+      const name = document.getElementById('newAccName').value.trim();
+      const type = document.getElementById('newAccType').value;
+      const bal = parseFloat(document.getElementById('newAccBalance').value) || 0;
+
+      if (!name) return alert('Nama akun wajib diisi!');
+
+      accounts.push({
+        id: 'acc_' + Date.now(),
+        name: name,
+        type: type,
+        balance: bal
+      });
+
+      document.getElementById('newAccName').value = '';
+      document.getElementById('newAccBalance').value = '0';
+      closeModal('accModal');
+      saveState();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function closeModalOnOut(e, id) {
+      if (e.target.id === id) closeModal(id);
+    }
+
+    function exportBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ accounts, transactions }, null, 2));
+      const dl = document.createElement('a');
+      dl.setAttribute("href", dataStr);
+      dl.setAttribute("download", `meld_backup_${Date.now()}.json`);
+      dl.click();
+    }
+
+    renderAll();
   </script>
 </body>
 </html>

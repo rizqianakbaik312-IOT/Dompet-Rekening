@@ -1,6 +1,6 @@
 {
-  "name": "Dompet & Ops Tracker",
-  "short_name": "DompetOps",
+  "name": "Dompet & Rekening Tracker",
+  "short_name": "DompetKu",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",

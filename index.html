@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Smart Dompet & Ops Tracker</title>
+  <title>Dompet & Rekening Tracker</title>
   <link rel="manifest" href="./manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -1002,7 +1002,7 @@
 
       // Notifikasi lengkap dengan nama rekening/cash
       let notifMsg = `${desc}: ${formatRupiah(amt)} via ${sourceName}`;
-      triggerLocalNotification("Dompet & Ops: Transaksi Berhasil", notifMsg);
+      triggerLocalNotification("DompetKu: Transaksi Berhasil", notifMsg);
 
       saveState();
     }
@@ -1178,7 +1178,7 @@
       let notifTxt = currentDebtType === 'piutang' 
         ? `Piutang baru: ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`
         : `Utang baru: dari ${person} Rp${amt.toLocaleString('id-ID')} (${walletName})`;
-      triggerLocalNotification("Dompet & Ops: Catatan Buku Disimpan", notifTxt);
+      triggerLocalNotification("DompetKu: Catatan Buku Disimpan", notifTxt);
     }
 
     function openSettleModal(debtId) {
@@ -1252,7 +1252,7 @@
       saveState();
 
       let notifLunas = `${activeSettleItem.person} lunas ${formatRupiah(amt)} masuk ke ${targetAcc.name}`;
-      triggerLocalNotification("Dompet & Ops: Pelunasan Berhasil", notifLunas);
+      triggerLocalNotification("DompetKu: Pelunasan Berhasil", notifLunas);
     }
 
     function openNewAccountModal() {
